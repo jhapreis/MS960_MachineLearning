@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from gradient_descendent import Gradient_Descendent_Exponential
+from Projeto1.exercicio_1.gd.gradient_descendent import Gradient_Descendent_Exponential
 
 x = np.random.rand(100,)
 b = 10*np.random.rand(100,)

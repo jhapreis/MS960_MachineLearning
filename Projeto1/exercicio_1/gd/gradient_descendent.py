@@ -253,12 +253,14 @@ def Gradient_Descendent_Exponential(x_data_init, y_data_init, initial_guess, lea
 
     # Regression exponential
     ax[1,1].scatter(x_data_init, y_data_init, color='gray')
-    x_exp = np.linspace(0, 1, 1000)
+    x_exp = np.linspace(0, 120, 1000)
     ax[1,1].plot( x_exp, expoential_regression_function(x_exp, theta_0, theta_1_exp) )
     ax[1,1].set_xlabel('number of days', fontsize=10)
     ax[1,1].set_ylabel('amount of cases', fontsize=10)
 
-    plt.show()
+    # plt.show()
+
+    plt.savefig(f'Projeto1/exercicio_1/results/exponential/exp.png')
 
 
     time_final = time()

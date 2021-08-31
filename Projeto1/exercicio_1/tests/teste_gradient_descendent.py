@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from gradient_descendent import Gradient_Descendent, linear_regression_function
+from Projeto1.exercicio_1.gd.gradient_descendent import Gradient_Descendent, linear_regression_function
 
 # y = x + 2
 
