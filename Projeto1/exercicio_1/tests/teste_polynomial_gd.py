@@ -20,8 +20,8 @@ coefficients, residuals_values = Multiple_Gradient_Descendent(
     x_data_init=x_data_polynomial, 
     y_data_init=y_data, 
     initial_guess=thetas, 
-    learning_rate=1E-3,
-    min_residual=1E-3,
+    learning_rate=1E-2,
+    min_residual=1E-5,
     max_tries=1E5, 
     normalize=0
     )

@@ -1,0 +1,10 @@
+,values
+learning_rate,0.001
+min_residual,0.0001
+max_tries,100000.0
+exp_reg,0.0
+pol_reg,1.0
+polynomial_degree,1.0
+residual,0.010002842609991376
+theta_0,-372010.1717115594
+theta_1,10866.641211404038

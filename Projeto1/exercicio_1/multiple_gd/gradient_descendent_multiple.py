@@ -1,4 +1,3 @@
-from numpy.lib.function_base import gradient
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,7 +61,7 @@ def multiple_gradient_residual_function(x_data, y_data, coefficients):
 def Multiple_Gradient_Descendent(x_data_init, y_data_init, initial_guess, learning_rate, min_residual=1E-3, max_tries=100, normalize=1):
 
     if normalize == 1:
-        x_data, y_data = normalization(x_data_init, y_data_init)
+        x_data, y_data = multiple_normalization(x_data_init, y_data_init)
     else:
         x_data, y_data = x_data_init, y_data_init
 
@@ -86,10 +85,12 @@ def Multiple_Gradient_Descendent(x_data_init, y_data_init, initial_guess, learni
     if residual <= min_residual:
         print(f'\n   Success! The residual is under the minimal value.\nAfter {tries} steps.\n\n')
     elif tries > max_tries:
-        print(f'\n   Failed! The number of tries was exceded.\nThe residual is {residual}\n\n')
+        print(f'\n   Failed! The number of tries was exceeded.\nThe residual is {residual:e}.\n\n')
 
-    
-    coefficients = thetas
+    if normalize == 1:
+        coefficients = undo_multiple_normalization(x_data_init, y_data_init, thetas)
+    else:
+        coefficients = thetas
 
     coefficients     = pd.DataFrame(coefficients, columns=['values'], index=[('theta_'+str(i)) for i in range(coefficients.shape[0])])
     residuals_values = pd.DataFrame(residuals_values, columns=['residuals'])
@@ -145,5 +146,60 @@ def polynomial_function(thetas, x_data):
 
     return(P_x)
 
+
+
+# =============================================================================
+def multiple_normalization(x_data, y_data):
+    '''
+    This function is built to...
+
+    Parameters
+    ----------
+    x_data:
+        Entries are on row-like input. [ [x_1], [x_2], ..., [x_n] ]
+    y_data:
+        Row vector; one-dimensional array
+    '''
+
+    y_data_norm = (y_data - y_data.min()) / (y_data.max() - y_data.min())
+
+    x_min   = x_data.min(axis=1).reshape(x_data.shape[0], 1)
+    x_max   = x_data.max(axis=1).reshape(x_data.shape[0], 1)
+    delta_x = x_max - x_min
+
+    x_data_norm = (x_data - x_min) / delta_x
+
+    return(x_data_norm, y_data_norm)
+
+
+
+# =============================================================================
+def undo_multiple_normalization(x_data, y_data, thetas):
+    '''
+    This function is built to...
+
+    Parameters
+    ----------
+    x_data:
+        Entries are on row-like input. [ [x_1], [x_2], ..., [x_n] ]
+    y_data:
+        Row vector; one-dimensional array
+    '''
+
+    y_min   = y_data.min()
+    y_max   = y_data.max()
+    delta_y = y_max - y_min
+
+    x_min   = x_data.min(axis=1).reshape(x_data.shape[0], 1)
+    x_max   = x_data.max(axis=1).reshape(x_data.shape[0], 1)
+    delta_x = x_max - x_min
+
+    thetas_1_to_n = thetas[1:].reshape(x_data.shape[0],1)
+    theta_0 = delta_y*( thetas[0] - sum(thetas_1_to_n*x_min/delta_x) ) + y_min
+    theta_i = delta_y*( thetas_1_to_n/delta_x ) # i >= 1
+
+    coefficients = np.append(theta_0, theta_i)
+
+    return(coefficients)
 
 
