@@ -5,7 +5,7 @@ Repository of the MS960 (Machine Learning) subject
 
 
 
-### PYTHONPATH
+## PYTHONPATH
 
 If you are on Linux:
 
