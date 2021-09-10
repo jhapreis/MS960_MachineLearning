@@ -6,15 +6,17 @@ from Projeto1.exercicio_2.logist.logistic_regression import Correct_Classificati
 
 
 
-df = pd.read_csv('Projeto1/data/exercicio_2/data_image.csv', index_col=0)
+print('\n\nUsing thetas on the data...\n\n')
+
+df = pd.read_csv('../../../Projeto1/data/exercicio_2/data_image.csv', index_col=0)
 df_image = df.iloc[:, :-1].T
 df_label = pd.DataFrame(df['label'])
 # print(df_label, '\n\n')
 
 
 
-thetas_regression = pd.read_csv('Projeto1/exercicio_2/results/regression/thetas_regression.csv', index_col=0)
-residuals_values  = pd.read_csv('Projeto1/exercicio_2/results/regression/residuals.csv', index_col=0).T
+thetas_regression = pd.read_csv('../../../Projeto1/exercicio_2/results/regression/thetas_regression.csv', index_col=0)
+residuals_values  = pd.read_csv('../../../Projeto1/exercicio_2/results/regression/residuals.csv', index_col=0).T
 # print('\n\n', thetas_regression)
 # print('\n\n', residuals_values)
 
@@ -47,9 +49,9 @@ results = results.append(total)
 Save to csv
 '''
 
-results.to_csv('Projeto1/exercicio_2/results/analysis/results.csv')
-classification.to_csv('Projeto1/exercicio_2/results/analysis/classification.csv')
-corrects.to_csv('Projeto1/exercicio_2/results/analysis/corrects.csv')
+results.to_csv('../../../Projeto1/exercicio_2/results/analysis/results.csv')
+classification.to_csv('../../../Projeto1/exercicio_2/results/analysis/classification.csv')
+corrects.to_csv('../../../Projeto1/exercicio_2/results/analysis/corrects.csv')
 
 
 

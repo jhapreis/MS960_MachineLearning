@@ -6,9 +6,11 @@ from Projeto1.exercicio_2.logist.logistic_regression import logistic_function, r
 
 
 
+print('\n\nRegression with test sample...')
+
 classifications = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-df = pd.read_csv('Projeto1/data/exercicio_2/data_sample.csv', index_col=0)
+df = pd.read_csv('../../../Projeto1/data/exercicio_2/data_sample.csv', index_col=0)
 df_sample = df.iloc[:, :-1]
 df_label = pd.DataFrame(df['label'])
 
@@ -62,10 +64,13 @@ coefficients, residuals_values = Logistic_Gradient_Descendent(
 # print(residuals_values, '\n\n')
 
 thetas = pd.DataFrame(thetas, columns=['label_'+str(i+1) for i in range(coefficients.shape[1])], index=[('theta_'+str(i)) for i in range(coefficients.shape[0])])
-thetas.to_csv('Projeto1/exercicio_2/results/regression/thetas_initial.csv')
-coefficients.to_csv('Projeto1/exercicio_2/results/regression/thetas_regression.csv')
-residuals_values.to_csv('Projeto1/exercicio_2/results/regression/residuals.csv')
+thetas.to_csv('../../../Projeto1/exercicio_2/results/regression/thetas_initial.csv')
+coefficients.to_csv('../../../Projeto1/exercicio_2/results/regression/thetas_regression.csv')
+residuals_values.to_csv('../../../Projeto1/exercicio_2/results/regression/residuals.csv')
 
+
+
+print('   \ndone\n\n')
 
 
 # =============================================================================
