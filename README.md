@@ -9,11 +9,11 @@ If you are on Linux:
 
   - Open your favorite terminal program;
   
-  - Open the file ~/.bashrc in your text editor – e.g. gedit ~/.bashrc;
+  - Open the file `~/.bashrc` in your text editor – e.g. `gedit ~/.bashrc`
   
   - Add the following line to the end:
     
-    export PYTHONPATH=/home/my_user/code
+    `export PYTHONPATH=/home/my_user/code`
   
   - Save the file.
   
@@ -21,7 +21,7 @@ If you are on Linux:
   
   - Start your terminal application again, to read in the new settings, and type this:
 
-    echo $PYTHONPATH
+    `echo $PYTHONPATH`
     
   - It should show something like /home/my_user/code.
 
