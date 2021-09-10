@@ -23,7 +23,7 @@ If you are on Linux:
 
     `echo $PYTHONPATH`
     
-  - It should show something like /home/my_user/code.
+  - It should show something like `/home/my_user/code`
 
 More infos: https://bic-berkeley.github.io/psych-214-fall-2016/using_pythonpath.html
 
