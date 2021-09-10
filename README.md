@@ -4,7 +4,7 @@ Repository of the MS960 (Machine Learning) subject
 
 
 
-## PYTHONPATH
+## 1. PYTHONPATH
 
 If you are on Linux:
 
@@ -27,5 +27,10 @@ If you are on Linux:
   - It should show something like `/home/my_user/code`
 
 More infos: https://bic-berkeley.github.io/psych-214-fall-2016/using_pythonpath.html
+
+
+## 2. RUN FILES
+
+After adjusting the PYTHONPATH, you can run the files on the correspondent folders.
 
 
