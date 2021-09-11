@@ -20,7 +20,7 @@ Which regression?
 exp_reg = 0
 pol_reg = 1    
 
-polynomial_degree = 9
+polynomial_degree = 5
 
 
 '''
@@ -53,7 +53,7 @@ if exp_reg == 1:
         ax_pos.set_ylabel('residual', fontsize=10)
         ax_pos.set_title(f'learning rate = {learning_rate[i]}')
     
-    fig.savefig(f'Projeto1/exercicio_1/results/exponential/residuals.png', dpi=600)
+    fig.savefig(f'../../../Projeto1/exercicio_1/results/exponential/residuals.png', dpi=600)
 
 
 
@@ -64,7 +64,7 @@ if exp_reg == 1:
     results.index = ['learning_rate', 'min_residual', 'max_tries', 'exp_reg', 'pol_reg', 'polynomial_degree']
     results.columns = coefficients.columns
     results = pd.concat([results, coefficients])
-    results.to_csv(f'Projeto1/exercicio_1/results/exponential/exp.csv')
+    results.to_csv(f'../../../Projeto1/exercicio_1/results/exponential/exp.csv')
 
 
 

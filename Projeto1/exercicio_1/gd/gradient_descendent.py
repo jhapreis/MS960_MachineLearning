@@ -199,7 +199,7 @@ def Gradient_Descendent(x_data_init, y_data_init, initial_guess, learning_rate, 
 
 
 # =============================================================================
-def Gradient_Descendent_Exponential(x_data_init, y_data_init, initial_guess, learning_rate, min_residual=1E-3, max_tries=100, normalize=1):
+def Gradient_Descendent_Exponential(x_data_init, y_data_init,  em , learning_rate, min_residual=1E-3, max_tries=100, normalize=1):
     '''
     This function is built to...
 
