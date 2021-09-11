@@ -9,7 +9,7 @@ from Projeto1.exercicio_1.multiple_gd.gradient_descendent_multiple import Multip
 '''
 Read csv and main parameters
 '''
-df_casos_covid = pd.read_csv('Projeto1/data/casesBrazil.csv')
+df_casos_covid = pd.read_csv('../../../Projeto1/data/casesBrazil.csv')
 learning_rate  = 1E-3
 min_residual   = 1E-4
 max_tries      = 1E5
@@ -20,7 +20,7 @@ Which regression?
 exp_reg = 0
 pol_reg = 1    
 
-polynomial_degree = 11
+polynomial_degree = 9
 
 
 '''
@@ -100,7 +100,7 @@ if pol_reg == 1:
     results.index = ['learning_rate', 'min_residual', 'max_tries', 'exp_reg', 'pol_reg', 'polynomial_degree', 'residual']
     results.columns = coefficients.columns
     results = pd.concat([results, coefficients])
-    results.to_csv(f'Projeto1/exercicio_1/results/polynomial/pol_{polynomial_degree}.csv')
+    results.to_csv(f'../../../Projeto1/exercicio_1/results/polynomial/pol_{polynomial_degree}.csv')
 
     '''
     Plot
@@ -114,6 +114,6 @@ if pol_reg == 1:
     y = multiple_linear_function(coefficients, x_polynomial)
     ax.plot(x_polynomial[0], y[0], color='orange')
 
-    plt.savefig(f'Projeto1/exercicio_1/results/polynomial/pol_{polynomial_degree}.png')
+    plt.savefig(f'../../../Projeto1/exercicio_1/results/polynomial/pol_{polynomial_degree}.png')
 
 
