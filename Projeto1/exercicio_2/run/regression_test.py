@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 from Projeto1.exercicio_2.logist.logistic_regression import Correct_Classification
 
@@ -9,6 +7,9 @@ from Projeto1.exercicio_2.logist.logistic_regression import Correct_Classificati
 print('\n\nUsing thetas on the data...\n\n')
 
 df = pd.read_csv('../../../Projeto1/data/exercicio_2/data_image.csv', index_col=0)
+# df = pd.read_csv('../../../Projeto1/data/exercicio_2/data_sample.csv', index_col=0)
+
+
 df_image = df.iloc[:, :-1].T
 df_label = pd.DataFrame(df['label'])
 # print(df_label, '\n\n')

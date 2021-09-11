@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-percent = 0.50
+percent = 0.999
 
 
 print(f'\n\nSelecting random samples... {100*percent}%')

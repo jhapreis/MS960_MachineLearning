@@ -38,7 +38,7 @@ classification_matrix.index = ['label_'+str(i+1) for i in range(classification_m
 Random thetas
 '''
 
-thetas = np.random.rand(df_sample.shape[1], len(classifications))/2
+thetas = np.random.rand(df_sample.shape[1]+1, len(classifications))/2 #+1 due to x_0
 # # thetas = np.ones((df_sample.shape[0], 1))
 # print(thetas.shape)
 # print(pd.DataFrame(thetas), '\n')

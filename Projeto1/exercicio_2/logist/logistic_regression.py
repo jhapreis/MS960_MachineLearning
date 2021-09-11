@@ -1,4 +1,5 @@
-from matplotlib.pyplot import axis, cla
+from datetime import timedelta
+from time import time
 import pandas as pd
 import numpy as np
 
@@ -113,6 +114,12 @@ def logistic_gradient_residual_function(x_data, y_data, coefficients):
 # =============================================================================
 def Logistic_Gradient_Descendent(x_data_init, y_data_init, initial_guess, learning_rate, min_residual=1E-3, max_tries=100, normalize=1):
 
+    time_start = time()
+
+
+    x_data_init = add_x0_column(x_data_init.T).T
+
+
     if normalize == 1:
         x_data, y_data = logistic_normalization(x_data_init), y_data_init
     else:
@@ -125,7 +132,6 @@ def Logistic_Gradient_Descendent(x_data_init, y_data_init, initial_guess, learni
 
     residuals_values = residual
 
-    # print(residuals_values.shape)
 
     while (tries < max_tries) and (np.all(residual) > min_residual):
 
@@ -150,8 +156,6 @@ def Logistic_Gradient_Descendent(x_data_init, y_data_init, initial_guess, learni
     else:
         coefficients = thetas
 
-
-    # coefficients     = pd.DataFrame(coefficients, columns=['label_'+str(i+1) for i in range(coefficients.shape[1])], index=[('theta_'+str(i)) for i in range(coefficients.shape[0])])
     
     coefficients     = pd.DataFrame(coefficients, columns=['label_'+str(i+1) for i in range(coefficients.shape[1])], index=[('theta_'+str(i)) for i in range(coefficients.shape[0])])
 
@@ -159,6 +163,10 @@ def Logistic_Gradient_Descendent(x_data_init, y_data_init, initial_guess, learni
     residuals_values.columns = ['try_'+str(i) for i in range(residuals_values.shape[1])]
     residuals_values.index   = coefficients.columns
 
+
+    time_finish = time()
+
+    print(f'\n\nAfter {timedelta(seconds = time_finish - time_start)}')
 
     return( coefficients, residuals_values  )
 
@@ -237,6 +245,7 @@ def classification_result(x_data, thetas_regression):
         .
     '''
 
+    x_data = add_x0_column(x_data.T).T
 
     logistic = logistic_function(x_data, thetas_regression)
 
@@ -273,6 +282,29 @@ def Correct_Classification(x_data, thetas_regression, original_labels):
     correct = (classification == original_labels).astype(int)
 
     return(classification, correct)
+
+
+
+# =============================================================================
+def add_x0_column(x_data):
+    '''
+    This function is built to...  
+
+    Parameters
+    ----------
+    x_data:
+        .
+    '''
+
+    x_data.insert(
+        loc=0, column='x_0', value=np.ones(   (x_data.shape[0], 1)   )
+        )
+
+    return(x_data)
+
+
+
+
 
 
 
