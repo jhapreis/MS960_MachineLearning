@@ -45,9 +45,6 @@ def residual_function_logistic(x_data, y_data, coefficients):
 
     logistic = logistic_function(x_data=x_data, coefficients=coefficients)
 
-    # sum_zero_term = np.dot(       y_data, np.log(logistic)     )
-    # sum_one_term  = np.dot( (1 - y_data), np.log(1 - logistic) )
-
     zero_term = y_data * np.log(logistic)
     one_term  = (1 - y_data) * np.log(1 - logistic)
 
