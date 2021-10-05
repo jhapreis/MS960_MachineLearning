@@ -1,110 +1,149 @@
 import numpy as np
+import pandas as pd
 
-from Projeto2.neural_network.errors import dimensional_error
-from Projeto2.neural_network.auxiliars import print_list, convert_1D_to_column
+from Projeto2.neural_network.errors import dimensional_error, matrix_multiplication_error, single_dimension_error
+
+from Projeto2.neural_network.insiders import *
 
 
 
 
-##################################################
-def initiate_constants(shape, limit):
+
+
+# =============================================================================
+def generate_thetas(number_input, number_output, limit=1):
     '''
-    shape: 
-    limit: 
-
-    returns an array of given shape of random numbers
-    '''
-
-    sample = np.random.uniform(low=-1*limit, high=limit, size=shape)
-
-    return(sample)
-
-
-
-##################################################
-def sigmoid_function(x_data, thetas):
-    '''
-    x_data: column vector; matrix with entries on the columns
-    thetas: column vector
-
-    returns a column vector of the sigmoid function
+    returns: thetas that connect one layer to the following; 
+        theta_XY --> theta that arrives on the Yth cell, starting from the Xth cell
     '''
 
-    z_value = np.dot(thetas.T, x_data)
+    thetas = initiate_constants(   (number_input, number_output) , limit=limit   ) 
 
-    sigmoid = 1 / (   1 + np.e**(-1*z_value)   ) 
+    thetas.index   = ['theta_x'+str(i) for i in range(thetas.shape[0])]
+    thetas.columns = [str(i+1) for i in range(thetas.shape[1])]
 
-    return(sigmoid)
-
-
-
-##################################################
-def cost_function(x_data, y_data, thetas):
-    pass
+    return(thetas)
 
 
-##################################################
+
+# =============================================================================
+def classification_matrix(df_label, correspondent_labels):
+    '''
+    '''
+
+    classification_matrix = pd.DataFrame()
+
+    for i in correspondent_labels:
+        column = (df_label == i)
+        classification_matrix = pd.concat([classification_matrix, column], axis=1)
+
+    classification_matrix *= 1 # True or False --> as type int
+    classification_matrix = classification_matrix.T
+    classification_matrix.index = ['label_'+str(i+1) for i in range(classification_matrix.shape[0])]
+
+    return(classification_matrix)
+
+
+
+# =============================================================================
+def neural_net_dimension(x_data, y_data, number_of_layers, multiplier):
+    '''
+    '''
+
+    dimensions = number_of_layers*[0]
+
+    dimensions[0]  = x_data.shape[0] # first layer
+    dimensions[-1] = y_data.shape[0] # last layer
+
+    for i in range( 1, len(dimensions) - 1 ): # middle layers
+        dimensions[i] = multiplier*dimensions[0]
+
+    return(dimensions)
+
+
+
+# =============================================================================
 def activation_values(x_data, thetas):
     '''
+    x_data: matrix with entries on the columns
+    thetas: 
+
+    returns ...
     '''
 
-    activation = [x_data] # requires x_0 = 1 to be added before
+    x_data_with_bias = add_x0_column(x_data.T).T
 
-    for i in range(len(thetas)):
+    activation = sigmoid_function(x_data_with_bias, thetas)
 
-        y_data = sigmoid_function(x_data=activation[i], thetas=thetas[i])
-
-        if i < len(thetas) - 1: # if this is not the last, add bias
-
-            y_data = np.concatenate(   ( [1], y_data )   )
-
-        activation.append(y_data)
-
-    return(activation)
-
-
-
-##################################################
-def error_value_layer(y_data, activation_values, thetas):
-
-    dimensional_error(activation_values[-1].shape, y_data.shape)
-
-    last_error = activation_values[-1] - y_data
+    return (activation)
     
-    errors = [last_error]
-
-    for i in range(   len(thetas)-1, 0, -1   ): # backwards propagation
-
-        sum_theta_deltas = np.dot( thetas[i][1:], errors[-1] ) # do not include bias coefficient
-
-        error = sum_theta_deltas * activation_values[i][1:] * (1 - activation_values[i][1:])
-
-        errors.append(error)
-
-    errors.reverse()
-
-    return(errors)
 
 
-
-##################################################
-def gradient_value_layer(activation_values, errors):
+# =============================================================================
+def gradient_layer(y_data, activations, thetas, lambda_value):
     '''
-    Calculates de gradient on a given layer
     '''
 
-    gradient = 0
-    pass
+    deltas = Delta_layer(y_data, activations, thetas)
+
+    grad = []
+
+    for i in range( len(thetas) ):
+
+        delta = deltas[i].to_numpy() / activations[i].shape[1] # delta = delta / n
+        theta = thetas[i].to_numpy()
+
+        dimensional_error(theta.shape, delta.shape)
+
+        grad_bias     = (delta[0]).reshape( 1, len(delta[0]) ) # theta_ij --> j  = 0
+        grad_not_bias = delta[1:] + lambda_value*theta[1:]     # theta_ij --> j != 0
+
+        grad_layer = np.concatenate([grad_bias, grad_not_bias], axis=0)
+
+        grad_layer = pd.DataFrame(grad_layer, index=thetas[i].index, columns=thetas[i].columns)
+
+        grad.append(grad_layer)
+
+    return(grad)
 
 
-##################################################
+# =============================================================================
+def cost_function_sigmoid(x_data, classification_matrix, coefficients):
+    '''
+    This function is built to...
+
+    Parameters
+    ----------
+    x_data:
+        Entries are on column-like input. [ [x_1], [x_2], ..., [x_n] ]
+    y_data:
+        .
+    coefficients:
+        .
+    '''
+
+    data_size = x_data.shape[1]
+
+    sigmoid = sigmoid_function(x_data=x_data, coefficients=coefficients)
+
+    zero_term = classification_matrix * np.log(sigmoid)
+    one_term  = (1 - classification_matrix) * np.log(1 - sigmoid)
+
+    residual_individual = -1*(zero_term + one_term) / data_size
+
+    residual = np.array( residual_individual.sum(axis=1) ).reshape( len(residual_individual), 1 )
+
+    return(residual)
+
+
+
+# =============================================================================
 def test_gradient():
     pass
     
 
 
-
-##################################################
+# =============================================================================
 def derivative_value_layer():
     pass
 
