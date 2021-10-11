@@ -1,13 +1,19 @@
+import sys
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from time import time
 from datetime import timedelta
+
+_ = Path().resolve().parent.parent # Add [...]\MS960_MachineLearning\Projeto2\run to PYTHONPATH
+sys.path.insert(0, str(_))
 
 from Projeto2.neural_network.neural import *
 from Projeto2.neural_network.auxiliars import *
 from Projeto2.neural_network.errors import *
 
 import cfg
+
 
 
 
