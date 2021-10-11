@@ -1,6 +1,5 @@
 import numpy as np
 
-
 # =============================================================================
 def transform_thetas_to_array(thetas):
     '''
@@ -32,5 +31,3 @@ def convert_1D_to_column(array):
         array = array.reshape(   (len(array),1)   )
 
     return(array)
-
-

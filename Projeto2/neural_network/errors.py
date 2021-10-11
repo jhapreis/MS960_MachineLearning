@@ -28,3 +28,18 @@ def single_dimension_error(shape_1, shape_2, axis=0):
 
 
 
+# =============================================================================
+def check_equal_values(df_previous, df_now, exit=1):
+    '''
+    '''
+
+    equality = df_previous.equals(df_now)
+
+    if equality:
+        msg = f"\n\n      The DataFrame is not being updated.\n\n"
+        if exit == 1:
+            raise ValueError(msg)
+        else:
+            print(msg)
+        
+

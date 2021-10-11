@@ -1,80 +1,93 @@
 import numpy as np
 import pandas as pd
+from time import time
+from datetime import timedelta
 
 from Projeto2.neural_network.neural import *
-from Projeto2.neural_network.auxiliars import print_list, convert_1D_to_column
+from Projeto2.neural_network.auxiliars import *
 from Projeto2.neural_network.errors import *
 
 import cfg
 
 
 
+
+
 '''
 Beggining
 '''
+print("\n\n      Running neural network...\n")
+
+time_start = time()
+
 df_images = pd.read_csv("../data/test/sample_images.csv", index_col=0)
 df_labels = pd.read_csv("../data/test/sample_labels.csv", index_col=0)
 
 class_matrix = classification_matrix(df_labels, cfg.labels)
+dimensions   = neural_net_dimension( df_images, class_matrix, cfg.number_of_layers, cfg.mult_hidden_layer, cfg.additional_layers ) # without bias
+thetas       = thetas_layers(dimensions, limit=cfg.init_thetas_range)
 
-dimensions = neural_net_dimension( df_images, class_matrix, cfg.number_of_layers, cfg.mult_hidden_layer ) # without bias
-
-thetas = []
-for i in range( len(dimensions)-1 ):
-    theta = generate_thetas(dimensions[i]+1, dimensions[i+1], limit=cfg.init_thetas_range) #include bias on the starting layer
-    thetas.append(theta)
-del(theta)
+print(f"\n   Dimensions: {dimensions}\n")
 
 
 
 '''
-Activations
+First roll
 '''
-activations = [df_images] # calculate for the first layer
-for i in range( len(dimensions)-1 ): # calculate for the others layers
-    activation = activation_values(activations[-1], thetas[i])
-    activations.append(activation)
-activations[-1].index = class_matrix.index
-del(activation)
+activations = activation_layer(df_images, class_matrix, thetas)
+grad        = gradient_layer(class_matrix, activations, thetas, lambda_value=cfg.lambda_value)
+cost        = cost_function_sigmoid(activations, class_matrix)
 
 
 
 '''
-Deltas
+While loop
 '''
-deltas = Delta_layer(class_matrix, activations, thetas)
+tries       = 1
+total_costs = pd.DataFrame()
+
+while (   tries <= cfg.max_tries   ) and (   np.all(cost > cfg.max_cost)   ):
+
+    total_costs[f"{tries}"] = cost
+
+    thetas      = update_thetas(thetas, grad, learning_rate=cfg.learning_rate)
+
+    activations = activation_layer(df_images, class_matrix, thetas)
+    grad        = gradient_layer(class_matrix, activations, thetas, lambda_value=cfg.lambda_value)
+    cost        = cost_function_sigmoid(activations, class_matrix)
+
+    if (cfg.tracking == True) and (tries % cfg.flag == 0):
+        print(   f"{tries}/{cfg.max_tries}\n"   )   
+
+    tries += 1
+
+
+if (tries > cfg.max_tries):
+    print(f"\n\n   Number of tries exceeded (> {round(cfg.max_tries)}).\n\n")
+elif ( np.all(cost <= cfg.max_cost) ):
+    print(f"\n\n   Success! After {tries} trie(s) (<= {round(cfg.max_tries)}), the costs are now under {cfg.max_cost} \n\n")
+else:
+    print("\n\n   No conditional\n\n")
 
 
 
 '''
-Gradient
+Time elapsed
 '''
-grad = gradient_layer(class_matrix, activations, thetas, lambda_value=cfg.lambda_value)
+time_end = time()
+print(f"\n\n      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n\n")
 
 
 
+'''
+Final
+'''
+print(f"\n\n   Valor de custo final:\n\n{cost}\n\n")
 
+total_costs.to_csv("../data/results/costs.csv")
 
-# x_data = np.array([1, 1, 1])
-
-# y_data = np.array([1])
-
-# thetas = [
-#     np.array([[0.57, -0.29], [0.47, 0.17],   [-0.52, 0.08]]),
-#     np.array([[0.13, 0.48],  [-0.69, -0.73], [-0.70, 0.11]]),
-#     np.array([[0.55], [0.76], [-0.25]])
-#     ]
-
-
-# activation = activation_values(df_images, thetas)
-
-
-# errors = error_value_layer(y_data, activation, thetas)
-
-
-
-
-# cost = cost_function_sigmoid(df_images, class_matrix, )
+for i in range(len(thetas)):
+    thetas[i].to_csv(f"../data/results/thetas_{i+1}{i+2}.csv")
 
 
 

@@ -1,26 +1,19 @@
 import numpy as np
 import pandas as pd
 
-from Projeto2.neural_network.errors import dimensional_error, matrix_multiplication_error, single_dimension_error
+from Projeto2.neural_network.errors import dimensional_error, matrix_multiplication_error, single_dimension_error, check_equal_values
 
 from Projeto2.neural_network.insiders import *
 
 
 
-
-
-
-# =============================================================================
-def generate_thetas(number_input, number_output, limit=1):
+def thetas_layers(dimensions, limit):
     '''
-    returns: thetas that connect one layer to the following; 
-        theta_XY --> theta that arrives on the Yth cell, starting from the Xth cell
     '''
-
-    thetas = initiate_constants(   (number_input, number_output) , limit=limit   ) 
-
-    thetas.index   = ['theta_x'+str(i) for i in range(thetas.shape[0])]
-    thetas.columns = [str(i+1) for i in range(thetas.shape[1])]
+    thetas = []
+    for i in range( len(dimensions)-1 ):
+        theta = generate_thetas(dimensions[i]+1, dimensions[i+1], limit=limit) #include bias on the starting layer
+        thetas.append(theta)
 
     return(thetas)
 
@@ -46,7 +39,7 @@ def classification_matrix(df_label, correspondent_labels):
 
 
 # =============================================================================
-def neural_net_dimension(x_data, y_data, number_of_layers, multiplier):
+def neural_net_dimension(x_data, y_data, number_of_layers, multiplier=1, additional=0):
     '''
     '''
 
@@ -55,28 +48,28 @@ def neural_net_dimension(x_data, y_data, number_of_layers, multiplier):
     dimensions[0]  = x_data.shape[0] # first layer
     dimensions[-1] = y_data.shape[0] # last layer
 
-    for i in range( 1, len(dimensions) - 1 ): # middle layers
-        dimensions[i] = multiplier*dimensions[0]
+    for i in range( 1, len(dimensions) - 1 ): # middle layers have the same size
+        dimensions[i] = multiplier*dimensions[0] + additional
 
     return(dimensions)
-
+    
 
 
 # =============================================================================
-def activation_values(x_data, thetas):
+def activation_layer(x_data, classification_matrix, thetas):
     '''
-    x_data: matrix with entries on the columns
-    thetas: 
-
-    returns ...
     '''
 
-    x_data_with_bias = add_x0_column(x_data.T).T
+    activations = [x_data]           # calculate for the first layer
 
-    activation = sigmoid_function(x_data_with_bias, thetas)
+    for i in range( len(thetas) ): # calculate for the others layers
+        activation = activation_values(activations[-1], thetas[i])
+        activations.append(activation)
 
-    return (activation)
-    
+    activations[-1].index = classification_matrix.index
+
+    return(activations)
+
 
 
 # =============================================================================
@@ -107,33 +100,46 @@ def gradient_layer(y_data, activations, thetas, lambda_value):
     return(grad)
 
 
+
 # =============================================================================
-def cost_function_sigmoid(x_data, classification_matrix, coefficients):
+def cost_function_sigmoid(activations, classification_matrix):
     '''
     This function is built to...
 
     Parameters
     ----------
-    x_data:
-        Entries are on column-like input. [ [x_1], [x_2], ..., [x_n] ]
-    y_data:
-        .
-    coefficients:
-        .
+    
     '''
 
-    data_size = x_data.shape[1]
+    dimensional_error(activations[-1].shape, classification_matrix.shape)
 
-    sigmoid = sigmoid_function(x_data=x_data, coefficients=coefficients)
+    number_of_elements = classification_matrix.shape[1]
+    last_activation = activations[-1]
 
-    zero_term = classification_matrix * np.log(sigmoid)
-    one_term  = (1 - classification_matrix) * np.log(1 - sigmoid)
+    residuals = classification_matrix*np.log(last_activation) + (1 - classification_matrix)*np.log(1 - last_activation)
 
-    residual_individual = -1*(zero_term + one_term) / data_size
+    cost = -1/number_of_elements * residuals.sum(axis=1)
 
-    residual = np.array( residual_individual.sum(axis=1) ).reshape( len(residual_individual), 1 )
+    cost = pd.DataFrame(cost, columns=['cost'])
 
-    return(residual)
+    return(cost)
+
+
+
+# =============================================================================
+def update_thetas(thetas, gradient, learning_rate):
+    '''
+    '''
+
+    for i in range(len(thetas)):
+
+        delta_theta = learning_rate*gradient[i]
+
+        check_equal_values(thetas[i], delta_theta)
+
+        thetas[i] -= delta_theta
+    
+    return(thetas)
 
 
 
@@ -149,5 +155,34 @@ def derivative_value_layer():
 
 
 
+# =============================================================================
+def check_cost_decreasing(total_costs):
+    '''
+    '''
+
+    boolean = pd.DataFrame()
+
+    for i in range(total_costs.shape[1]-1):
+
+        _ = ( total_costs[total_costs.columns[i+1]] <= total_costs[total_costs.columns[i]] )
+
+        boolean[f"{i+1}_{i+2}"] = _
+
+    if ( np.all(boolean) != True ):
+
+        not_decreasing = []
+
+        _ = np.all(boolean, axis=0)
+
+        for i in range(_.shape[0]):
+            if _.iloc[i] != True:
+                not_decreasing.append(_.iloc[i])
+        
+        msg = f"\n\n   Not decreading on {not_decreasing}\n\n"
+
+    else:
+        msg = "\n\n   All costs are decreasing in every single step.\n\n"
+        
+    print(msg)
 
 

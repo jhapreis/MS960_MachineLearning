@@ -87,6 +87,39 @@ def sigmoid_function(x_data, thetas):
 
 
 # =============================================================================
+def generate_thetas(number_input, number_output, limit=1):
+    '''
+    returns: thetas that connect one layer to the following; 
+        theta_XY --> theta that arrives on the Yth cell, starting from the Xth cell
+    '''
+
+    thetas = initiate_constants(   (number_input, number_output) , limit=limit   ) 
+
+    thetas.index   = ['theta_x'+str(i) for i in range(thetas.shape[0])]
+    thetas.columns = [str(i+1) for i in range(thetas.shape[1])]
+
+    return(thetas)
+
+
+
+# =============================================================================
+def activation_values(x_data, thetas):
+    '''
+    x_data: matrix with entries on the columns
+    thetas: 
+
+    returns ...
+    '''
+
+    x_data_with_bias = add_x0_column(x_data.T).T
+
+    activation = sigmoid_function(x_data_with_bias, thetas)
+
+    return (activation)
+
+
+
+# =============================================================================
 def delta_value_layer(y_data, activation_values, thetas):
     '''
     '''
