@@ -31,6 +31,6 @@ More infos: https://bic-berkeley.github.io/psych-214-fall-2016/using_pythonpath.
 
 ## 2. RUN FILES
 
-After adjusting the PYTHONPATH, you can run the files on the correspondent folders.
+After adjusting the PYTHONPATH, you can run the files on the correspondent `run` folders.
 
 
