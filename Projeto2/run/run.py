@@ -100,7 +100,7 @@ for i in range(len(thetas)):
     thetas[i].to_csv(f"../data/results/thetas_{i+1}{i+2}.csv")
 
 
-if (cfg.send_email == True) and (CONFIG_FILE_EMAILS == True):
+if (cfg.SEND_EMAIL == True) and (CONFIG_FILE_EMAILS == True):
     subject = "[MS_960] Projeto 2"
     msg     = f"{msg_dim}{msg_result}{msg_time}{msg_cost}"
     SendEmailAWS(subject, msg)
