@@ -12,7 +12,7 @@ init_thetas_range = 1E-1 # range to initiate the thetas constants
 lambda_value      = 1E-1 # lambda for the regularization
 
 max_cost          = 1E-2      
-max_tries         = int(1E1)  
+max_tries         = int(5E0)  
 learning_rate     = 1E-1 
 
 tracking          = True
