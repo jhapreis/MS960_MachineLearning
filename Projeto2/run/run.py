@@ -71,11 +71,11 @@ while (   tries <= cfg.MAX_TRIES   ) and (   np.all(cost > cfg.MAX_COST)   ):
 
 
 if (tries > cfg.MAX_TRIES):
-    msg_result = f"\n\n   Number of tries exceeded (> {cfg.MAX_TRIES}).\n\n"
+    msg_result = f"\n   Number of tries exceeded (> {cfg.MAX_TRIES}).\n"
 elif ( np.all(cost <= cfg.MAX_COST) ):
-    msg_result = f"\n\n   Success! After {tries} trie(s) (<= {cfg.MAX_TRIES}), the costs are now under {cfg.MAX_COST} \n\n"
+    msg_result = f"\n   Success! After {tries} trie(s) (<= {cfg.MAX_TRIES}), the costs are now under {cfg.MAX_COST} \n"
 else:
-    msg_result = "\n\n   No conditional\n\n"
+    msg_result = "\n   No conditional\n"
 print(msg_result)
 
 
@@ -83,7 +83,7 @@ print(msg_result)
 Time elapsed
 '''
 time_end = time()
-msg_time = f"\n\n      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n\n"
+msg_time = f"\n      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n"
 print(msg_time)
 
 
