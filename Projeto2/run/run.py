@@ -11,7 +11,7 @@ sys.path.insert(0, str(_))
 from Projeto2.neural_network.neural import *
 from Projeto2.neural_network.auxiliars import *
 from Projeto2.neural_network.errors import *
-from Projeto2.neural_network.send_email import SendEmail
+from Projeto2.neural_network.SendEmail_AWS import SendEmailAWS
 
 import cfg
 
@@ -91,7 +91,7 @@ print(msg_time)
 '''
 Final
 '''
-msg_cost = f"\n\n   Valor de custo final:\n\n{cost}\n\n"
+msg_cost = f"   Valor de custo final:\n\n{cost}\n"
 print(msg_cost)
 
 total_costs.to_csv("../data/results/costs.csv")
@@ -103,6 +103,6 @@ for i in range(len(thetas)):
 if cfg.send_email == True:
     subject = "[MS_960] Projeto 2"
     msg     = f"{msg_dim}{msg_result}{msg_time}{msg_cost}"
-    SendEmail(subject, msg)
+    SendEmailAWS(subject, msg)
 
 
