@@ -23,7 +23,7 @@ df_label.columns = ['value']
 '''
 Take a sample
 '''
-df_data_sample  = df_data.sample(frac=cfg.sample_fraction, random_state=cfg.random_state, axis=1).T.sort_index().T
+df_data_sample  = df_data.sample(frac=cfg.SAMPLE_FRACTION, random_state=cfg.RANDOM_STATE, axis=1).T.sort_index().T
 df_label_sample = df_label.T[df_data_sample.columns].T.sort_index()
 
 
@@ -31,7 +31,7 @@ df_label_sample = df_label.T[df_data_sample.columns].T.sort_index()
 '''
 Separate (or not)
 '''
-if cfg.separate_data == True:
+if cfg.SEPARATE_DATA == True:
     df_data  = df_data.drop(columns=df_data_sample.columns)
     df_label = df_label.T.drop(columns=df_data_sample.columns).T
 
