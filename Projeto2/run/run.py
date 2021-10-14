@@ -11,6 +11,7 @@ sys.path.insert(0, str(_))
 from Projeto2.neural_network.neural import *
 from Projeto2.neural_network.auxiliars import *
 from Projeto2.neural_network.errors import *
+from Projeto2.neural_network.send_email import SendEmail
 
 import cfg
 
@@ -33,7 +34,8 @@ class_matrix = classification_matrix(df_labels, cfg.labels)
 dimensions   = neural_net_dimension( df_images, class_matrix, cfg.number_of_layers, cfg.mult_hidden_layer, cfg.additional_layers ) # without bias
 thetas       = thetas_layers(dimensions, limit=cfg.init_thetas_range)
 
-print(f"\n   Dimensions: {dimensions}\n")
+msg_dim = f"\n   Dimensions: {dimensions}\n"
+print(msg_dim)
 
 
 
@@ -69,31 +71,38 @@ while (   tries <= cfg.max_tries   ) and (   np.all(cost > cfg.max_cost)   ):
 
 
 if (tries > cfg.max_tries):
-    print(f"\n\n   Number of tries exceeded (> {round(cfg.max_tries)}).\n\n")
+    msg_result = f"\n\n   Number of tries exceeded (> {cfg.max_tries}).\n\n"
 elif ( np.all(cost <= cfg.max_cost) ):
-    print(f"\n\n   Success! After {tries} trie(s) (<= {round(cfg.max_tries)}), the costs are now under {cfg.max_cost} \n\n")
+    msg_result = f"\n\n   Success! After {tries} trie(s) (<= {cfg.max_tries}), the costs are now under {cfg.max_cost} \n\n"
 else:
-    print("\n\n   No conditional\n\n")
-
+    msg_result = "\n\n   No conditional\n\n"
+print(msg_result)
 
 
 '''
 Time elapsed
 '''
 time_end = time()
-print(f"\n\n      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n\n")
+msg_time = f"\n\n      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n\n"
+print(msg_time)
 
 
 
 '''
 Final
 '''
-print(f"\n\n   Valor de custo final:\n\n{cost}\n\n")
+msg_cost = f"\n\n   Valor de custo final:\n\n{cost}\n\n"
+print(msg_cost)
 
 total_costs.to_csv("../data/results/costs.csv")
 
 for i in range(len(thetas)):
     thetas[i].to_csv(f"../data/results/thetas_{i+1}{i+2}.csv")
 
+
+if cfg.send_email == True:
+    subject = "[MS_960] Projeto 2"
+    msg     = f"{msg_dim}{msg_result}{msg_time}{msg_cost}"
+    SendEmail(subject, msg)
 
 
