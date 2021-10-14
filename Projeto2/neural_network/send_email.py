@@ -1,6 +1,6 @@
 import smtplib
 try:
-    from Projeto2.run import cfg_email
+    from Projeto2._secure import cfg_email
 except:
     print('\nNo config file for the email.\n'+
     'Please, make sure you have a config-file named "cfg_email.py" and with the following files:\n'+
