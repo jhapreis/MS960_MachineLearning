@@ -13,9 +13,11 @@ try:
     from Projeto2._secure import cfg_email
 except ModuleNotFoundError as e:
     print('cfg_email was not found :/\n\n')
+    CONFIG_FILE_EMAILS = False
     # exit()
 else:
-    CONFIG_FILE_EMAILS = False
+    pass
+    
 
 
 
