@@ -7,11 +7,16 @@ sys.path.insert(0, str(_))
 from botocore.exceptions import ClientError
 import boto3
 
+CONFIG_FILE_EMAILS = True # it will check the existence of the cfg_email file
+
 try:
     from Projeto2._secure import cfg_email
 except ModuleNotFoundError as e:
-    print('cfg_email was not found :/\n')
-    exit()
+    print('cfg_email was not found :/\n\n')
+    # exit()
+else:
+    CONFIG_FILE_EMAILS = False
+
 
 
 
