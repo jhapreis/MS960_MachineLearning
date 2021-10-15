@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from time import time
 from datetime import timedelta
+from progress.bar import IncrementalBar
 
 _ = Path().resolve().parent.parent # Add [...]\MS960_MachineLearning\Projeto2\run to PYTHONPATH
 sys.path.insert(0, str(_))
@@ -54,9 +55,12 @@ While loop
 tries       = 1
 total_costs = pd.DataFrame()
 
+if cfg.TRACKING == True:
+    bar = IncrementalBar('neural', max = cfg.MAX_TRIES, suffix='%(percent).1f%% - %(eta)ds') 
+
 while (   tries <= cfg.MAX_TRIES   ) and (   np.any(cost > cfg.MAX_COST)   ):
 
-    total_costs[f"{tries}"] = cost
+    total_costs = pd.concat([total_costs, cost], axis=1)
 
     thetas      = update_thetas(thetas, grad, learning_rate=cfg.LEARNING_RATE)
 
@@ -64,18 +68,18 @@ while (   tries <= cfg.MAX_TRIES   ) and (   np.any(cost > cfg.MAX_COST)   ):
     grad        = gradient_layer(class_matrix, activations, thetas, lambda_value=cfg.LAMBDA_VALUE)
     cost        = cost_function_sigmoid(activations, class_matrix)
 
-    if (cfg.TRACKING == True) and (tries % cfg.PRINT_FLAG == 0):
-        print(   f"{tries}/{cfg.MAX_TRIES}\n"   )   
+    if bar:
+        bar.next()
 
     tries += 1
 
 
 if (tries > cfg.MAX_TRIES):
-    msg_result = f"\n   Number of tries exceeded (> {cfg.MAX_TRIES}).\n"
+    msg_result = f"\n\n   Number of tries exceeded (> {cfg.MAX_TRIES}).\n"
 elif ( np.all(cost <= cfg.MAX_COST) ):
-    msg_result = f"\n   Success! After {tries} trie(s) (<= {cfg.MAX_TRIES}), the costs are now under {cfg.MAX_COST} \n"
+    msg_result = f"\n\n   Success! After {tries} trie(s) (<= {cfg.MAX_TRIES}), the costs are now under {cfg.MAX_COST} \n"
 else:
-    msg_result = f"\n   No conditional. After {tries} trie(s) (<= {cfg.MAX_TRIES}).\n"
+    msg_result = f"\n\n   No conditional. After {tries} trie(s) (<= {cfg.MAX_TRIES}).\n"
 print(msg_result)
 
 
@@ -83,7 +87,7 @@ print(msg_result)
 Time elapsed
 '''
 time_end = time()
-msg_time = f"\n      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n"
+msg_time = f"      Done. Finished after {timedelta(seconds = time_end - time_start)}. \n"
 print(msg_time)
 
 
