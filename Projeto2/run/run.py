@@ -56,9 +56,9 @@ tries       = 1
 total_costs = pd.DataFrame()
 
 if cfg.TRACKING == True:
-    bar = IncrementalBar('neural', max = cfg.MAX_TRIES, suffix='%(percent).1f%% - %(eta)ds') 
+    bar = IncrementalBar('backprop', max = cfg.MAX_TRIES, suffix='%(percent).1f%% - %(eta)ds') 
 
-while (   tries <= cfg.MAX_TRIES   ) and (   np.any(cost > cfg.MAX_COST)   ):
+while (   tries <= cfg.MAX_TRIES   ) and (   np.all(cost > cfg.MAX_COST)   ):
 
     total_costs = pd.concat([total_costs, cost], axis=1)
 
@@ -73,7 +73,7 @@ while (   tries <= cfg.MAX_TRIES   ) and (   np.any(cost > cfg.MAX_COST)   ):
 
     tries += 1
 
-total_costs.columns = [str(i) for i in range(total_costs.shape[1])] 
+total_costs.columns = [str(i+1) for i in range(total_costs.shape[1])] 
 
 
 

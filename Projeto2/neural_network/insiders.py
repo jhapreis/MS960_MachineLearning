@@ -157,7 +157,7 @@ def delta_value_layer(y_data, activation_values, thetas):
 def Delta_layer(y_data, activations, thetas):
     '''
     y_data: 
-    activations: list with the avtivation values of all layers
+    activations: list with the activation values of all layers
     thetas: 
 
     returns...

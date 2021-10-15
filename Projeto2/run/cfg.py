@@ -4,8 +4,8 @@
 LABELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] # official labels
 
 NUMBER_OF_LAYERS  = 3 # start, middle(hidden), end
-MULT_HIDDEN_LAYER = 0 # n times the start layer 
-ADDITIONAL_LAYERS = 25#   
+MULT_HIDDEN_LAYER = 3 # n times the start layer 
+ADDITIONAL_LAYERS = 0 #   
 
 INIT_THETAS_RANGE = 1E-1 # range to initiate the thetas constants
 
