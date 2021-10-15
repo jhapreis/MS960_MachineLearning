@@ -6,7 +6,7 @@ from time import time
 from datetime import timedelta
 from progress.bar import IncrementalBar
 
-_ = Path().resolve().parent.parent # Add [...]\MS960_MachineLearning\Projeto2\run to PYTHONPATH
+_ = Path().resolve().parent.parent # Add [...]\MS960_MachineLearning\Projeto2 to PYTHONPATH
 sys.path.insert(0, str(_))
 
 from Projeto2.neural_network.neural import *
@@ -72,6 +72,9 @@ while (   tries <= cfg.MAX_TRIES   ) and (   np.any(cost > cfg.MAX_COST)   ):
         bar.next()
 
     tries += 1
+
+total_costs.columns = [str(i) for i in range(total_costs.shape[1])] 
+
 
 
 if (tries > cfg.MAX_TRIES):
