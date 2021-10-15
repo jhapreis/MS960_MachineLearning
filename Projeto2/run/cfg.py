@@ -11,7 +11,7 @@ INIT_THETAS_RANGE = 1E-1 # range to initiate the thetas constants
 
 LAMBDA_VALUE      = 1E-3 # lambda for the regularization
 
-MAX_COST          = 1E-1      
+MAX_COST          = 1E-2      
 MAX_TRIES         = int(1E4)  
 LEARNING_RATE     = 1E-1 
 
