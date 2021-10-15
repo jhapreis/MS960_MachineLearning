@@ -54,7 +54,7 @@ While loop
 tries       = 1
 total_costs = pd.DataFrame()
 
-while (   tries <= cfg.MAX_TRIES   ) and (   np.all(cost > cfg.MAX_COST)   ):
+while (   tries <= cfg.MAX_TRIES   ) and (   np.any(cost > cfg.MAX_COST)   ):
 
     total_costs[f"{tries}"] = cost
 
@@ -75,7 +75,7 @@ if (tries > cfg.MAX_TRIES):
 elif ( np.all(cost <= cfg.MAX_COST) ):
     msg_result = f"\n   Success! After {tries} trie(s) (<= {cfg.MAX_TRIES}), the costs are now under {cfg.MAX_COST} \n"
 else:
-    msg_result = "\n   No conditional\n"
+    msg_result = f"\n   No conditional. After {tries} trie(s) (<= {cfg.MAX_TRIES}).\n"
 print(msg_result)
 
 
