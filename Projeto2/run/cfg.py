@@ -4,8 +4,8 @@
 LABELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] # official labels
 
 NUMBER_OF_LAYERS  = 3 # start, middle(hidden), end
-MULT_HIDDEN_LAYER = 3 # n times the start layer 
-ADDITIONAL_LAYERS = 0#   
+MULT_HIDDEN_LAYER = 0 # n times the start layer 
+ADDITIONAL_LAYERS = 25#   
 
 INIT_THETAS_RANGE = 1E-1 # range to initiate the thetas constants
 
@@ -17,7 +17,7 @@ LEARNING_RATE     = 1E-1
 
 TRACKING          = True
 PRINT_FLAG        = 0.1*MAX_TRIES # every 10%, print
-SEND_EMAIL        = True
+SEND_EMAIL        = False
 
 
 
