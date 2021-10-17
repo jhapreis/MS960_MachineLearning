@@ -1,10 +1,15 @@
+import sys
+
+
+
 # =============================================================================
 def dimensional_error(shape_1, shape_2):
     '''
     '''
 
     if shape_1 != shape_2:
-        raise ValueError(f'\n   Error on the shapes: {shape_1} and {shape_2}. They were supposed to be equal.\n')
+        err_msg = f'\n   Error on the shapes: {shape_1} and {shape_2}. They were supposed to be equal.\n'
+        raise Exception(err_msg)
 
 
 
@@ -42,4 +47,25 @@ def check_equal_values(df_previous, df_now, exit=1):
         else:
             print(msg)
         
+
+
+# =============================================================================
+def Check_ValuesFrac_Lambdas(values_frac, lambdas):
+    '''
+    '''
+
+    if ( len(values_frac) > 1) and ( len(lambdas) > 1):
+
+        print("   \nCAUTION: you are going to execute the backprop multiple times for both, percentual_frac and lambda_values.\nDo you want to continue? [y/n] ")
+        userInput = input()
+
+        if userInput == 'y':
+            raise NotImplementedError()
+        elif userInput == 'n':
+            print("\nok... quitting\n")
+            sys.exit()
+        else:
+            print("\nShould be \"y\" or \"n\"")
+            sys.exit()
+
 
