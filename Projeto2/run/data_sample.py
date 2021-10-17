@@ -6,6 +6,7 @@ import cfg
 print('\n\nSplitting data and test csv files...\n')
 
 
+
 '''
 Read CSVs
 '''
@@ -21,32 +22,48 @@ df_label.columns = ['value']
 
 
 '''
-Take a sample
+Take a sample for test and another for validation
+    sample for training
+    remove the training sample from original
+    sample for validation
+    revome validation sample from original (already removed training sample)
+    the rest is the test sample
 '''
-df_data_sample  = df_data.sample(frac=cfg.SAMPLE_FRACTION, random_state=cfg.RANDOM_STATE, axis=1).T.sort_index().T
-df_label_sample = df_label.T[df_data_sample.columns].T.sort_index()
 
+df_data_treino  = df_data.sample(frac=cfg.SAMPLE_TREINO, random_state=cfg.RANDOM_STATE, axis=1).T.sort_index().T
+df_label_treino = df_label.T[df_data_treino.columns].T.sort_index()
 
+df_data  = df_data.drop(   columns=df_data_treino.columns)
+df_label = df_label.T.drop(columns=df_data_treino.columns).T
 
-'''
-Separate (or not)
-'''
-if cfg.SEPARATE_DATA == True:
-    df_data  = df_data.drop(columns=df_data_sample.columns)
-    df_label = df_label.T.drop(columns=df_data_sample.columns).T
+df_data_valid  = df_data.sample(frac=cfg.SAMPLE_VALID, random_state=cfg.RANDOM_STATE, axis=1).T.sort_index().T
+df_label_valid = df_label.T[df_data_valid.columns].T.sort_index()
+
+df_data  = df_data.drop(   columns=df_data_valid.columns)
+df_label = df_label.T.drop(columns=df_data_valid.columns).T
+
+df_data_test  = df_data
+df_label_test = df_label
 
 
 
 '''
 Save new CSV files
 '''
-df_data.to_csv("../data/test/images.csv")
 
-df_data_sample.to_csv("../data/test/sample_images.csv")
+training_folder   = "../data/training"
+validation_folder = "../data/validation"
+test_folder       = "../data/test"
 
-df_label.to_csv("../data/test/labels.csv")
 
-df_label_sample.to_csv("../data/test/sample_labels.csv")
+df_data_treino.to_csv(f"{training_folder}/images.csv")
+df_label_treino.to_csv(f"{training_folder}/labels.csv")
+
+df_data_valid.to_csv(f"{validation_folder}/images.csv")
+df_label_valid.to_csv(f"{validation_folder}/labels.csv")
+
+df_data_test.to_csv(f"{test_folder}/images.csv")
+df_label_test.to_csv(f"{test_folder}/labels.csv")
 
 
 
