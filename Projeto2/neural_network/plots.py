@@ -45,7 +45,6 @@ def distribution_figs_per_page(number_of_figures, height=4, width=4):
 # =============================================================================
 def multiple_gen_image(   images, classifications, nrows=4, ncols=4, figsize=(12,12)   ):
 
-    # fig, axarr = plt.subplots(nrows, ncols, figsize=figsize)
     figs = []
 
     images_per_pg = nrows*ncols
@@ -55,11 +54,7 @@ def multiple_gen_image(   images, classifications, nrows=4, ncols=4, figsize=(12
     
     for n in range(quantidade_pg):
 
-
-
         fig, axarr = plt.subplots(nrows, ncols, figsize=figsize) # generate page of images
-
-        
 
         for i in range(nrows): # fill that page with the figures
 
@@ -100,42 +95,84 @@ def multiple_gen_image(   images, classifications, nrows=4, ncols=4, figsize=(12
 
 
 # =============================================================================
-def plot_curva_aprendizado(cost_treino, cost_valid, sample_size, value_frac_treino, max_tries, folder="../data/results/curva_aprendizado.png"):
+def plot_curva_aprendizado(cost_treino, cost_valid, max_tries, file="../data/results/curva_aprendizado.png"):
 
-    x = sample_size*value_frac_treino
+
+    sample_steps = cost_treino.loc['samples']
+    cost_treino  = cost_treino.drop(labels='samples', axis=0)
+    cost_valid   = cost_valid.drop(labels='samples', axis=0)
+
+    if len(sample_steps) == 1:
+        print("Only one value_frac. Cannot plot graph.\n")
+        return -1
 
     fig, ax = plt.subplots(figsize=(10,6))
 
-    ax.plot(x, cost_treino.mean(axis=0), color='orange', label='Treino')
-    ax.plot(x, cost_valid.mean(axis=0) , color='blue'  , label='Validação')
+    ax.scatter(sample_steps, cost_treino.mean(axis=0), color='orange')
+    ax.scatter(sample_steps, cost_valid.mean(axis=0) , color='blue'  )
+    ax.plot(sample_steps, cost_treino.mean(axis=0), color='orange', label='Treino')
+    ax.plot(sample_steps, cost_valid.mean(axis=0) , color='blue'  , label='Validação')
 
     ax.set_xlabel('Tamanho da amostra de treinamento', fontsize=14)
     ax.set_ylabel('Valor médio da função de custo', fontsize=14)
-    ax.set_title(f'{len(value_frac_treino)} tamanhos de amostra; {round(max_tries)} execuções por tamanho')
+    ax.set_title(f'{cost_treino.shape[1]} tamanhos de amostra; {round(max_tries)} execuções por tamanho')
     plt.suptitle('Curva de aprendizado médio', fontsize=18)
-    # plt.xticks(np.arange(0,3500,500))
     plt.legend()
 
-    plt.savefig(folder)
+    plt.savefig(file)
 
-    # plt.show()
+    return 0
 
 
 
 # =============================================================================
-def plot_optimize_lambda(lambdas, cost_valid, max_tries, folder="../data/results/curva_lambdas.png"):
-    
+def plot_optimize_lambda(cost_valid, title='', parameter='mean', file="../data/results/curva_lambdas.png"):
+
+    if len(cost_valid.loc['lambdas']) == 1:
+        print("Only one lambda_value. Cannot plot graph.\n")
+        return -1
+
+    '''
+    Check +/- np.inf or negative cost and remove
+    '''
+    _ = np.any(cost_valid == np.inf, axis=0)
+    if np.any(_) == True:
+        indx = [_.index[i] for i in range(_.shape[0]) if _[i] == True]
+        print(f"Deleting {indx} from cost_valid due to inf values.")
+        cost_valid = cost_valid.drop(indx, axis=1)
+
+    _ = np.any(cost_valid < 0      , axis=0)
+    if np.any(_) == True:
+        indx = [_.index[i] for i in range(_.shape[0]) if _[i] == True]
+        print(f"Deleting {indx} from cost_valid due to negative values.")
+        cost_valid = cost_valid.drop(indx, axis=1)
+
+    lambdas     = cost_valid.loc['lambdas']
+    cost_valid  = cost_valid.drop(labels='lambdas', axis=0)
+
     fig, ax = plt.subplots(figsize=(10,6))
 
-    ax.plot(lambdas, cost_valid.mean(axis=0) , color='grey', label='Validação')
-
+    if parameter == 'max':
+        ax.scatter(lambdas, cost_valid.max(axis=0), color='orange')
+        ax.plot(   lambdas, cost_valid.max(axis=0), color='orange', label='Validação')
+        type_metric = 'máximo'
+    elif parameter == 'min':
+        ax.scatter(lambdas, cost_valid.min(axis=0), color='orange')
+        ax.plot(   lambdas, cost_valid.min(axis=0), color='orange', label='Validação')
+        type_metric = 'mínimo'
+    else:
+        ax.scatter(lambdas, cost_valid.mean(axis=0), color='orange')
+        ax.plot(   lambdas, cost_valid.mean(axis=0), color='orange', label='Validação')
+        type_metric = 'médio'
+    
     ax.set_xlabel(r'Valores do hiperparâmetro de regularização $\lambda$', fontsize=14)
-    ax.set_ylabel('Valor médio da função de custo da validação', fontsize=14)
-    ax.set_title(f'{len(lambdas)} lambdas; {round(max_tries)} execuções por tamanho')
+    ax.set_ylabel(f'Valor {type_metric} da função de custo da validação', fontsize=14)
+    ax.set_title(title)
     plt.suptitle('Otimização do parâmetro de regularização', fontsize=18)
-    # plt.xticks(np.arange(0,3500,500))
     plt.legend()
 
-    plt.savefig(folder)
+    plt.savefig(file)
+
+    return 0
 
 

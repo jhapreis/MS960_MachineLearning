@@ -6,184 +6,390 @@ from time import time
 from datetime import timedelta
 from progress.bar import IncrementalBar
 
-
+import concurrent.futures
 
 _ = Path().resolve().parent.parent # Add [...]\MS960_MachineLearning\Projeto2 to PYTHONPATH
 sys.path.insert(0, str(_))
 
-from Projeto2.neural_network.plots import plot_curva_aprendizado, plot_optimize_lambda
-from Projeto2.neural_network.neural import BackPropagation_NeuralNetwork
-from Projeto2.neural_network.midders import *
-from Projeto2.neural_network.auxiliars import *
-from Projeto2.neural_network.errors import *
+from Projeto2.neural_network.plots         import plot_optimize_lambda, plot_curva_aprendizado
+from Projeto2.neural_network.neural        import BackPropagation_NeuralNetwork, BackPropagation_CalculateValidation, BackPropagation_CurvaAprendizado
+from Projeto2.neural_network.midders       import *
+from Projeto2.neural_network.errors        import *
 from Projeto2.neural_network.SendEmail_AWS import SendEmailAWS, CONFIG_FILE_EMAILS
 
 import cfg
 
 
 
-'''
-Type of run
-'''
+"""
+PLEASE, PAY ATTENTION: THIS SCRIPT WILL ASK REQUEST, FROM YOUR OPERATIONAL SYSTEM, MULTIPLE INSTANCES OF PYTHON (MULTIPROCESSING)
+BE AWARE OF THAT
 
-msg = '' # message to send email, if requested
+General structure for the script:
 
-if cfg.OPTIMIZE_LAMBDA == True:
-    msg_run = f"This is a run for OPTIMIZE_LAMBDA.\n"
-    print(msg_run)
-    msg += msg_run
-    
-elif cfg.CURVA_APRENDIZADO == True:
-    msg_run = f"This is a run for CURVA_APRENDIZADO.\n"
-    print(msg_run)
-    msg += msg_run
+    1) Type of run
 
-elif cfg.SAVE_THETAS == True:
-    msg_run = f"This is a run for SAVE_THETAS.\n"
-    print(msg_run)
-    msg += msg_run
+    2) Beggining
 
-else:
-    msg_run = f"Not defined type of run.\n"
-    print(msg_run)
-    msg += msg_run
+    3) Progress bar and DataFrames to store data
 
+    4) Backpropagation:
 
-
-'''
-Beggining
-'''
-time_start = time()
-
-training_folder  = "../data/training"
-valid_folder     = "../data/validation"
-
-df_images_training = pd.read_csv(f"{training_folder}/images.csv", index_col=0)
-df_labels_training = pd.read_csv(f"{training_folder}/labels.csv", index_col=0)
-
-df_images_valid = pd.read_csv(f"{valid_folder}/images.csv", index_col=0)
-df_labels_valid = pd.read_csv(f"{valid_folder}/labels.csv", index_col=0)
-
-msg_start = f"\n\nRunning neural network... Training with {df_images_training.shape[1]} images.\n\n"
-print(msg_start)
-msg += msg_start
-
-
-
-
-'''
-While loop for the Backpropagation Execution
-'''
-# total_costs = pd.DataFrame()
-cost_treino   = pd.DataFrame()
-cost_valid    = pd.DataFrame()
-
-
-bar_lambdas     = False
-bar_frac_treino = False
-if cfg.TRACKING == True:
-    bar_lambdas     = IncrementalBar('      lambdas', max = len(cfg.LAMBDA_VALUE)     , suffix='%(percent).1f%%')
-    bar_frac_treino = IncrementalBar('   fracs'     , max = len(cfg.VALUE_FRAC_TREINO), suffix='%(percent).1f%%')
-
-
-
-Check_ValuesFrac_Lambdas(cfg.VALUE_FRAC_TREINO, cfg.LAMBDA_VALUE) # check if both loops are going to be executed; intertravamento
-
-
-
-for frac_values in cfg.VALUE_FRAC_TREINO:
-
-
-    images = df_images_training.sample(frac=frac_values, random_state=cfg.RANDOM_STATE, axis=1).T.sort_index().T
-    labels = df_labels_training.T[images.columns].T.sort_index()
-
-
-    for lambda_value in cfg.LAMBDA_VALUE:
-
-
-        thetas, cost, msg = BackPropagation_NeuralNetwork(
-            df_images          = images,
-            df_labels          = labels,
-            init_thetas_range  = cfg.INIT_THETAS_RANGE,
-            number_of_layers   = cfg.NUMBER_OF_LAYERS,
-            mult_hidden_layers = cfg.MULT_HIDDEN_LAYER,
-            aditional_layers   = cfg.ADDITIONAL_LAYERS,
-            orig_labels        = cfg.LABELS,
-            max_tries          = cfg.MAX_TRIES,
-            max_cost           = cfg.MAX_COST,
-            lambda_value       = lambda_value,
-            learning_rate      = cfg.LEARNING_RATE,
-            msg                = msg
-        )
+        - for OPTMIZE_LAMBDA
+            Once the unique change is lambda_value, it's worth it to calculate all preliminars before
+            Backpropagation
+            After that, use the thetas from the training result to calculate the cost of the validation
         
-        
-        '''
-        use the thetas from the training result to calculate the cost of the validation
-        '''
-        class_matrix_validation = classification_matrix(df_labels_valid, cfg.LABELS)
-        activation_validation   = activation_layer(df_images_valid, class_matrix_validation, thetas) 
-        _ = cost_function_sigmoid(activation_validation, class_matrix_validation, thetas, lambda_value=lambda_value)
-
-        cost_valid  = pd.concat([cost_valid, _], axis=1)
-        cost_treino = pd.concat([cost_treino, cost], axis=1)
-
-
-        if bar_lambdas:
-            # print('\n')
-            bar_lambdas.next()
-            print('\n')
+        - for CURVA_APRENIZADO
+            It runs a backpropagation for every percentage of sample on the df_training
+            Backpropagation
+            After that, use the thetas from the training result to calculate the cost of the validation
     
+    5) Time elapsed
 
-    if bar_frac_treino:
-        print('\n\n')
-        bar_frac_treino.next()
-        print('\n')
+    6) Final
 
+    7) Save CSVs and plot graphics
 
-cost_treino.columns = [str(i+1) for i in range(cost_treino.shape[1])]
-cost_valid.columns  = [str(i+1) for i in range(cost_valid.shape[1]) ]
-
-
-
-'''
-Time elapsed
-'''
-time_end = time()
-msg_time = f"\n\nDone. Finished after {timedelta(seconds = time_end - time_start)}.\n"
-print(msg_time)
-msg += msg_time
+    8) Send Email
+"""
 
 
 
-'''
-Final
-'''
-msg_cost = f"   \n\n\nValor de custo final:\n\n{cost}\n"
-print(msg_cost)
-msg += msg_cost
-
-if (cfg.CURVA_APRENDIZADO == True) or (cfg.OPTIMIZE_LAMBDA == True):
-
-    cost_treino.to_csv(f"{training_folder}/results/cost.csv")
-    cost_valid.to_csv(f"{valid_folder}/results/cost.csv")
-
-    if cfg.CURVA_APRENDIZADO == True:
-        plot_curva_aprendizado(cost_treino, cost_valid, df_images_training.shape[1], cfg.VALUE_FRAC_TREINO, cfg.MAX_TRIES)
-    elif cfg.OPTIMIZE_LAMBDA == True:
-        plot_optimize_lambda(cfg.LAMBDA_VALUE, cost_valid, cfg.MAX_TRIES)
-
-elif cfg.SAVE_THETAS == True:
-    for i in range(len(thetas)):
-        thetas[i].to_csv(f"{training_folder}/results/thetas_{i+1}{i+2}.csv")
 
 
+if __name__ == '__main__':
 
-'''
-Send Email
-'''
-if (cfg.SEND_EMAIL == True) and (CONFIG_FILE_EMAILS == True):
-    subject = "[MS_960] Projeto 2"
-    # msg     = f"{msg_dim}{msg_result}{msg_time}{msg_cost}"
-    SendEmailAWS(subject, msg)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+
+        '''
+        1. Type of run and configs
+        '''
+        if cfg.SEND_EMAIL == True:
+            msg = '' # message to send email, if requested
+        else:
+            msg = False  
+        if cfg.OPTIMIZE_LAMBDA == True:
+
+            res_folder = cfg.OPTLAMBDA_FOLDER 
+            msg_run = f"This is a run for OPTIMIZE_LAMBDA.\n"
+            print(msg_run)
+
+            lambda_values = []
+
+            if cfg.TRACKING == True:
+                bar_lambdas = IncrementalBar('      lambdas', max = len(cfg.LAMBDA_VALUE), suffix='%(percent).1f%%')
+            else:
+                bar_lambdas = False
+
+            if msg != False:
+                msg += msg_run      
+        elif cfg.CURVA_APRENDIZADO == True:
+
+            res_folder = cfg.CURVA_APRENDIZADO_FOLDER 
+            msg_run = f"This is a run for CURVA_APRENDIZADO.\n"
+            print(msg_run)
+
+            value_fracs   = []
+
+            if cfg.TRACKING == True:
+                bar_aprend  = IncrementalBar('      aprendizado', max = len(cfg.CURVA_APRENDIZADO), suffix='%(percent).1f%%')
+            else:
+                bar_aprend = False
+            if msg != False:
+                msg += msg_run      
+        elif cfg.SAVE_THETAS == True:
+
+            res_folder = cfg.SAVETHETAS_FOLDER
+
+            msg_run = f"This is a run for SAVE_THETAS.\n"
+            print(msg_run)
+
+            lambda_values = []   
+            
+            if cfg.TRACKING == True:
+                bar_lambdas = IncrementalBar('      lambdas', max = len(cfg.LAMBDA_VALUE), suffix='%(percent).1f%%')
+            else:
+                bar_lambdas = False
+
+            if msg != False:
+                msg += msg_run  
+        else:
+            res_folder = cfg.OTHERS_FOLDER
+
+
+
+
+        '''
+        2. Beggining: read data and normalize
+        '''
+        time_start = time()
+
+        df_images_training = pd.read_csv(f"{cfg.TRAINING_FOLDER}/images.csv"  , index_col=0)
+        # df_images_training = normalize_data(df_images_training)
+        df_labels_training = pd.read_csv(f"{cfg.TRAINING_FOLDER}/labels.csv"  , index_col=0)
+
+        df_images_valid    = pd.read_csv(f"{cfg.VALIDATION_FOLDER}/images.csv", index_col=0)
+        # df_images_valid    = normalize_data(df_images_valid)
+        df_labels_valid    = pd.read_csv(f"{cfg.VALIDATION_FOLDER}/labels.csv", index_col=0)
+
+        msg_start = f"\n\nRunning neural network... Training with {df_images_training.shape[1]} images.\n\n"
+        print(msg_start)
+        if msg != False:
+            msg += msg_start
+
+
+
+
+        '''
+        3. DataFrames to store the results data
+        '''
+        cost_treino         = pd.DataFrame()
+        cost_valid          = pd.DataFrame()
+        thetas_all          = [] # stores all thetas that results from the Neural Network
+        cost_steps_all      = [] # stores all training cost and every step
+        num_grad_error      = []
+        backprop_grad_error = []
+        flag_grad_error     = []
+        
+
+        
+            
+
+
+        '''
+        Multiple executor: PLEASE, NOTICE THAT THE ORDER OF EXECUTION IS NOT NECESSARILY THE SAME AS IT APPEARS
+                           SO, YOU SHOULD KEEP TRACK OF LAMBDA_VALUES AND/OR FRAC_VALUES, IN ORDER TO MATCH THE RESULTS
+        '''
+
+        if (cfg.OPTIMIZE_LAMBDA == True) or (cfg.SAVE_THETAS == True):
+
+            images = df_images_training.sample(frac=cfg.VALUE_FRAC_TREINO[0], random_state=cfg.RANDOM_STATE, axis=1).T.sort_index().T
+            labels = df_labels_training.T[images.columns].T.sort_index()
+
+            class_matrix_training = classification_matrix(labels, cfg.LABELS)
+            dimensions            = neural_net_dimension(images, class_matrix_training, cfg.NUMBER_OF_LAYERS, cfg.MULT_HIDDEN_LAYER, cfg.ADDITIONAL_LAYERS) # without bias
+            init_thetas           = thetas_layers(dimensions, limit=cfg.INIT_THETAS_RANGE)
+
+
+            msg_dim = f"      Dimensions: {dimensions}... {images.shape[1]} images.\n"
+            print(msg_dim)
+            if msg != False:
+                msg += msg_dim
+
+
+            results = [ 
+                executor.submit(
+                    BackPropagation_CalculateValidation,
+                    images,                # df_training
+                    df_images_valid,       # df_valid
+                    cfg.LABELS,            # orig_labels
+                    df_labels_valid,       # label_valid
+                    class_matrix_training, # class_matrix_training
+                    dimensions,            # dimensions
+                    init_thetas,           # thetas
+                    cfg.MAX_TRIES,         # max_tries
+                    cfg.MAX_COST,          # max_cost
+                    _,                     # lambda_value
+                    cfg.LEARNING_RATE,     # learning_rate
+                    msg,                   # msg
+                    bar_lambdas,           # progress_bar=False
+                    cfg.COST_MEASUREMENT   # cost_metric='any'
+                )   
+
+                for _ in cfg.LAMBDA_VALUE
+            ]
+
+
+
+        elif cfg.CURVA_APRENDIZADO == True:
+            
+            dimensions = [
+                df_images_training.shape[0], 
+                cfg.MULT_HIDDEN_LAYER*df_images_training.shape[0]+cfg.ADDITIONAL_LAYERS,
+                len(cfg.LABELS)
+                ]
+            msg_dim = f"      Dimensions: {dimensions}... max of {df_images_training.shape[1]} images.\n"
+            print(msg_dim)
+            if msg != False:
+                msg += msg_dim
+            
+            results = [ 
+                executor.submit(
+                    BackPropagation_CurvaAprendizado,
+                    _,                     # value_frac_treino
+                    df_images_training,    # df_training
+                    df_labels_training,    # df_label_training
+                    df_images_valid,       # df_valid
+                    df_labels_valid,       # df_label_valid
+                    cfg.LABELS,            # orig_labels
+                    cfg.INIT_THETAS_RANGE, # thetas_range, 
+                    cfg.MAX_TRIES,         # max_tries,
+                    cfg.MAX_COST,          # max_cost, 
+                    cfg.LAMBDA_VALUE[0],   # lambda_value,
+                    cfg.LEARNING_RATE,     # learning_rate,
+                    msg,                   # msg,
+                    bar_aprend,            # progress_bar=False,
+                    cfg.RANDOM_STATE,      # random_state=None,
+                    cfg.NUMBER_OF_LAYERS,  # number_of_layers=3,
+                    cfg.MULT_HIDDEN_LAYER, # mult_hidden_layer=0,
+                    cfg.ADDITIONAL_LAYERS, # additional_neurons=25
+                    cfg.COST_MEASUREMENT   # cost_metric='any'  
+                )
+
+                for _ in cfg.VALUE_FRAC_TREINO
+            ]
+
+
+
+        for f in concurrent.futures.as_completed(results): 
+            """
+            Erro no teste do gradiente:
+                f.results():
+                    for OPTIMIZE_LAMBDA:
+                        - 0 = status (0,1,-1)
+                        - 1 = numerical_grad
+                        - 2 = gradient[-1]
+                        - 3 = lambda_value
+                    for CURVA_APRENDIZADO:
+                        - 0 = status (0,1,-1)
+                        - 1 = numerical_grad
+                        - 2 = gradient[-1]
+                        - 3 = value_frac
+                    for SAVE_THETAS:
+                        - 0 = 
+                        - 1 = 
+                        - 2 = 
+                        - 3 = 
+
+            Aprovado no teste do gradiente:
+                f.results():
+                    for OPTIMIZE_LAMBDA:
+                        - 0 = thetas
+                        - 1 = cost_steps
+                        - 2 = cost_validation
+                        - 3 = lambda_value
+                        - 4 = msg
+                    for CURVA_APRENDIZADO:
+                        - 0 = thetas
+                        - 1 = cost_steps
+                        - 2 = cost_validation
+                        - 3 = value_frac
+                        - 4 = msg
+                    for SAVE_THETAS:
+                        - 0 = 
+                        - 1 = 
+                        - 2 = 
+                        - 3 = 
+                        - 4 = 
+            """
+
+            if f.result()[0] == 1: # erro no teste do gradiente
+                num_grad_error.append(f.result()[1])
+                backprop_grad_error.append(f.result()[2])
+                flag_grad_error.append(f.result()[3])
+
+            else:
+                thetas_all.append(    f.result()[0])
+                cost_steps_all.append(f.result()[1])
+
+                cost_treino = pd.concat([cost_treino, f.result()[1][f.result()[1].columns[-1]]], axis=1)
+                cost_valid  = pd.concat([cost_valid , f.result()[2]], axis=1)
+
+                if cfg.OPTIMIZE_LAMBDA == True:
+                    lambda_values.append(f.result()[3])
+                elif cfg.CURVA_APRENDIZADO == True:
+                    value_fracs.append(  f.result()[3])
+
+                msg += f.result()[4]
+
+        columns_labels      = [str(i+1) for i in range(cost_treino.shape[1])]
+        cost_treino.columns = columns_labels
+        cost_valid.columns  = columns_labels
+
+
+
+
+        if cfg.OPTIMIZE_LAMBDA: # add DataFrame for lambdas on costs
+
+            lambda_values = pd.DataFrame(lambda_values, columns=['lambdas'], index=columns_labels)
+
+            cost_treino   = pd.concat([cost_treino, lambda_values.T], axis=0)
+            cost_treino.sort_values(by='lambdas', axis='columns', inplace=True)
+
+            cost_valid    = pd.concat([cost_valid, lambda_values.T] , axis=0)
+            cost_valid.sort_values(by='lambdas', axis='columns', inplace=True)
+
+            cost_treino.to_csv(f"{res_folder}/cost_treino.csv")
+            cost_valid.to_csv(f"{res_folder}/cost_valid.csv")
+
+            plot_optimize_lambda(
+                cost_valid=cost_valid,
+                title=f'{len(cost_valid.loc["lambdas"])} lambdas; {round(cfg.MAX_TRIES)} execuções por tamanho; {images.shape[1]} imagens', 
+                file=f"{cfg.OPTLAMBDA_FOLDER}/lambdas.png"
+                )
+
+
+        elif cfg.SAVE_THETAS:
+
+            if ( len(thetas_all) > 1) or (len(cost_steps_all) > 1):
+                raise ValueError("It's supposed to only have a single thetas among thetas_all when running SAVE_THETAS.\n")
+
+            thetas_all     = thetas_all[0]
+            cost_steps_all = cost_steps_all[0]
+
+            cost_treino.to_csv(f"{res_folder}/cost_treino.csv")
+            cost_valid.to_csv(f"{res_folder}/cost_valid.csv")
+            cost_steps_all.to_csv(f"{res_folder}/cost_steps.csv")
+
+
+            for i in range(   len(thetas_all)   ): 
+                thetas_all[i].to_csv(f"{res_folder}/thetas_{i+1}_{i+2}.csv")
+
+
+
+        elif cfg.CURVA_APRENDIZADO: # add DataFrame for value_fracs on costs
+
+            value_fracs   = df_images_training.shape[1]*np.array(value_fracs)
+            value_samples = pd.DataFrame(value_fracs, columns=['samples'], index=columns_labels)
+
+            cost_treino = pd.concat([cost_treino, value_samples.T], axis=0)
+            cost_treino.sort_values(by='samples', axis='columns', inplace=True)
+
+            cost_valid  = pd.concat([cost_valid, value_samples.T] , axis=0)
+            cost_valid.sort_values(by='samples', axis='columns', inplace=True)
+
+            cost_treino.to_csv(f"{res_folder}/cost_treino.csv")
+            cost_valid.to_csv(f"{res_folder}/cost_valid.csv")
+
+            plot_curva_aprendizado(
+                cost_treino=cost_treino,
+                cost_valid=cost_valid,
+                max_tries=cfg.MAX_TRIES,
+                file=f"{cfg.CURVA_APRENDIZADO_FOLDER}/aprendizado.png"
+                )        
+            
+
+
+
+
+
+        '''
+        5. Time elapsed
+        '''
+        time_end = time()
+        msg_time = f"\n\nDone. Finished after {timedelta(seconds = time_end - time_start)}.\n"
+        print(msg_time)
+        if msg != False:
+            msg += msg_time
+
+
+        '''
+        8. Send Email
+        '''
+        if (cfg.SEND_EMAIL == True) and (CONFIG_FILE_EMAILS == True):
+            subject = "[MS_960] Projeto 2"
+            # msg     = f"{msg_dim}{msg_result}{msg_time}{msg_cost}"
+            SendEmailAWS(subject, msg)
 
 
