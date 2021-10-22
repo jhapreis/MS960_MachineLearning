@@ -16,24 +16,50 @@ ADDITIONAL_LAYERS = 25 #
 INIT_THETAS_RANGE = 1E-4 # range to initiate the thetas constants
 
 MAX_COST          = 5E-2      
-MAX_TRIES         = 1E3  
-LEARNING_RATE     = 5E-1 
+MAX_TRIES         = 1E2 
+LEARNING_RATE     = 1E-1 
+COST_MEASUREMENT  = 'any'
 
-# LAMBDA_VALUE      = [1E-1] # lambda for the regularization
-LAMBDA_VALUE      = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
+SEND_EMAIL        = False
+TRACKING          = False
 
-NUMBER_VALUE_FRAC = 10
-# VALUE_FRAC_TREINO = np.arange(0.1, 1.1, 1/NUMBER_VALUE_FRAC) # from 10% to 100% of the sample_treino, with given step
-VALUE_FRAC_TREINO = [1]
-
-
-SAVE_THETAS       = False
+"""SAVE_THETAS"""
+SAVE_THETAS       = True
 CURVA_APRENDIZADO = False
-OPTIMIZE_LAMBDA   = True
-SEND_EMAIL        = True
-TRACKING          = True
+OPTIMIZE_LAMBDA   = False
+LAMBDA_VALUE      = [0] 
+VALUE_FRAC_TREINO = [1.] 
+
+"""CURVA_APRENDIZADO"""
+# SAVE_THETAS       = False
+# CURVA_APRENDIZADO = True
+# OPTIMIZE_LAMBDA   = False
+# NUMBER_VALUE_FRAC = 10
+# VALUE_FRAC_TREINO = np.arange(0.1, 1.1, 1/NUMBER_VALUE_FRAC) # from 10% to 100% of the sample_treino, with given step
+# LAMBDA_VALUE      = [1.] # lambda for the regularization
+
+"""OPTMIZE_LAMBDA"""
+# SAVE_THETAS       = False
+# CURVA_APRENDIZADO = False
+# OPTIMIZE_LAMBDA   = True
+# VALUE_FRAC_TREINO = [1.]
+# LAMBDA_VALUE      = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.2, 1.5, 1.7, 1.9, 2.5, 3., 10.]
 
 
+
+
+
+
+# =============================================================================
+# NEURAL NETWORK
+# =============================================================================
+
+TRAINING_FOLDER          = "../data/training"
+VALIDATION_FOLDER        = "../data/validation"
+OPTLAMBDA_FOLDER         = "../data/results/lambda_opt"
+CURVA_APRENDIZADO_FOLDER = "../data/results/curva_aprendizado"
+SAVETHETAS_FOLDER        = "../data/results/save_thetas"
+OTHERS_FOLDER            = "../data/results/others"
 
 
 
@@ -43,22 +69,25 @@ TRACKING          = True
 # =============================================================================
 
 if (CURVA_APRENDIZADO == True) and (OPTIMIZE_LAMBDA == True):
-    print(f"    You cannot run both CURVA_APRENDIZADO e OPTIMIZE_LAMBDA as True at the same time. Choose one.\n")
-    sys.exit()
+    print(f"    You are trying to run CURVA_APRENDIZADO and LAMBDA_VALUE. Choose only one kind.\n")
+    sys.exit(-1)
 
 elif (CURVA_APRENDIZADO == True) and (len(LAMBDA_VALUE) > 1):
     print(f"    You are trying to run CURVA_APRENDIZADO, but we found that there is more than one LAMBDA_VALUE (actually, {len(LAMBDA_VALUE)}). Choose only one kind.\n")
-    sys.exit()
+    sys.exit(-1)
 
 elif (len(VALUE_FRAC_TREINO) > 1) and (OPTIMIZE_LAMBDA == True):
     print(f"    You are trying to run OPTIMIZE_LAMBDA, but we found that there is more than one VALUE_FRAC_TREINO (actually, {len(VALUE_FRAC_TREINO)}). Choose only one kind.\n")
-    sys.exit()
+    sys.exit(-1)
 
-if (OPTIMIZE_LAMBDA == True) or (CURVA_APRENDIZADO == True):
-    if SAVE_THETAS == True:
-        print("Doesn't allow SAVE_THETAS if OPTIMIZE_LAMBDA or if trying to generate CURVA_APRENDIZADO\n")
-        SAVE_THETAS = False
 
+if (OPTIMIZE_LAMBDA + CURVA_APRENDIZADO + SAVE_THETAS > 1):
+    print(f"    There's was attempt to run more then one kind at the same time. Please, change the cfg configs.")
+    sys.exit(-1)
+
+if (SAVE_THETAS == True and len(VALUE_FRAC_TREINO) > 1) or (SAVE_THETAS == True and len(LAMBDA_VALUE) > 1):
+    print(f"    There's was attempt to run more then one kind at the same time, cause the lists have len > 1. Please, change the cfg configs.")
+    sys.exit(-1)
 
 
 

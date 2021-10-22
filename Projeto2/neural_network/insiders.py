@@ -168,7 +168,7 @@ def Delta_layer(y_data, activations, thetas):
 
     summed_deltas = []
 
-    for i in range( len(deltas)-1, -1, -1 ): # backward, for every layer L, L-1, ..., 1
+    for i in range( len(deltas)-1, -1, -1 ): # backwards, for every layer L, L-1, ..., 1
 
         delta_layer      = deltas[i]
         activation_layer = add_x0_column(activations[i].T).T # add bias
@@ -191,7 +191,7 @@ def Delta_layer(y_data, activations, thetas):
 
             dimensional_error(matrix_activ.shape, a_times_delta.shape)
 
-            a_times_delta += matrix_activ*matrix_delta
+            a_times_delta = a_times_delta + np.multiply(matrix_activ,matrix_delta)
 
         a_times_delta = pd.DataFrame(a_times_delta, index=thetas[i].index, columns=thetas[i].columns)
 
@@ -202,5 +202,25 @@ def Delta_layer(y_data, activations, thetas):
     return(summed_deltas) 
 
 
+
+# =============================================================================
+def compare_cost_categories(cost_values, max_cost, cost_metric='any'):
+
+    if cost_metric == 'all':
+        compare = np.all(cost_values > max_cost)
+
+    elif cost_metric == 'mean':
+        compare = ( cost_values.mean() > max_cost )
+
+    elif cost_metric == 'max':
+        compare = ( cost_values.max() > max_cost )
+
+    elif cost_metric == 'min':
+        compare = ( cost_values.min() > max_cost )
+
+    elif cost_metric == 'any':
+        compare = np.any(cost_values > max_cost)
+
+    return compare
 
 

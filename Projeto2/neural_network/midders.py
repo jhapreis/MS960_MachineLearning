@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import normalize
 
 from Projeto2.neural_network.errors import dimensional_error, matrix_multiplication_error, single_dimension_error, check_equal_values
-
 from Projeto2.neural_network.insiders import *
 
 
@@ -89,8 +89,12 @@ def gradient_layer(y_data, activations, thetas, lambda_value):
 
         dimensional_error(theta.shape, delta.shape)
 
-        grad_bias     = (delta[0]).reshape( 1, len(delta[0]) ) # theta_ij --> j  = 0
-        grad_not_bias = delta[1:] + lambda_value*theta[1:]     # theta_ij --> j != 0
+        grad_bias     = (delta[0]).reshape( 1, len(delta[0]) )     # theta_ij --> j  = 0
+        
+        if lambda_value == 0:
+            grad_not_bias = delta[1:]                              # theta_ij --> j != 0
+        else:
+            grad_not_bias = delta[1:] + lambda_value*theta[1:]     # theta_ij --> j != 0
 
         grad_layer = np.concatenate([grad_bias, grad_not_bias], axis=0)
 
@@ -117,17 +121,22 @@ def cost_function_sigmoid(activations, classification_matrix, thetas, lambda_val
     number_of_elements = classification_matrix.shape[1]
     last_activation = activations[-1]
 
-    residuals = classification_matrix*np.log(last_activation) + (1 - classification_matrix)*np.log(1 - last_activation)
+    cost_not_regular = np.multiply( classification_matrix, np.log(last_activation) ) + np.multiply( (1 - classification_matrix) , np.log(1 - last_activation) )
+    cost_not_regular = cost_not_regular.sum(axis=1)
 
-    cost_not_regular   = residuals.sum(axis=1)
-    cost_regular       = lambda_value*(thetas[-1]**2).sum(axis=0).T # lambda_value*(thetas**2)
-    cost_regular.index = cost_not_regular.index # label with same name, in order to sum element-wise
+    if lambda_value == 0:
+        cost = cost_not_regular
+    else:
+        cost_regular = (thetas[-1]**2).sum(axis=0).T # sum all thetas that arrive on the same cell
+        cost_regular.index = cost_not_regular.index # label with same name, in order to sum element-wise
+        dimensional_error(cost_not_regular.shape, cost_regular.shape)
 
-    dimensional_error(cost_not_regular.shape, cost_regular.shape)
+        #cost = -1/m*cost_regular + lambda/2m*cost_not_regular
 
-    cost = cost_regular + cost_not_regular
+        cost =  -1/number_of_elements*cost_not_regular + lambda_value/(2*number_of_elements)*cost_regular 
+        dimensional_error(cost_regular.shape, cost.shape)
 
-    cost = pd.DataFrame( -1/number_of_elements*cost, columns=['cost'] ) 
+    cost = pd.DataFrame( cost, columns=['cost'] ) 
 
     return(cost)
 
@@ -151,14 +160,63 @@ def update_thetas(thetas, gradient, learning_rate):
 
 
 # =============================================================================
-def test_gradient():
-    pass
-    
+def normalize_data(df):
+
+    df = pd.DataFrame( normalize(df), columns=df.columns, index=df.index )
+
+    return df
+
 
 
 # =============================================================================
-def derivative_value_layer():
-    pass
+def test_gradient(gradient, thetas, activations_neural, classification_matrix, lambda_value=1, step=1E-4, tolerance=1E-4):
+    """
+        All parameters are for the entire neural network
+
+        Method: calculate thetas+/-epsilon and, for every element on the starting-layer, 
+    switch the correspondent line on the array and calculate the correspondent costs and numerical-gradients.
+
+        Applies the test only on the last layer, using the results from activations[-2]
+    """
+    
+    dimensional_error(thetas[-1].shape, gradient[-1].shape)
+
+    last_thetas = thetas[-1]
+    
+    last_thetas_plus_step  = thetas[-1] + step
+    last_thetas_minus_step = thetas[-1] - step
+
+    num_grad_total = pd.DataFrame()
+
+    for i in range( gradient[-1].shape[0] ):
+
+
+        last_thetas_plus      = pd.concat( [last_thetas[0:i], last_thetas_plus_step[i:i+1] , last_thetas[i+1:]] , axis=0 )
+
+        last_thetas_minus     = pd.concat( [last_thetas[0:i], last_thetas_minus_step[i:i+1], last_thetas[i+1:]] , axis=0 )
+
+        last_activation_plus  = activation_values(activations_neural[-2], last_thetas_plus ).to_numpy()
+        last_activation_minus = activation_values(activations_neural[-2], last_thetas_minus).to_numpy()
+
+        cost_plus             = cost_function_sigmoid([last_activation_plus] , classification_matrix, [last_thetas_plus] , lambda_value)
+        cost_minus            = cost_function_sigmoid([last_activation_minus], classification_matrix, [last_thetas_minus], lambda_value)
+
+        print(cost_plus)
+        print(cost_minus)
+
+        num_grad   = (cost_plus - cost_minus)/(2*step) # it's a column DataFrame
+        num_grad_total = pd.concat([num_grad_total, num_grad], axis=1)
+
+    num_grad_total = num_grad_total.T
+
+    dimensional_error(num_grad_total.shape, gradient[-1].shape)
+
+    num_grad_total.index   = gradient[-1].index
+    num_grad_total.columns = gradient[-1].columns
+
+    _ = (   np.abs( gradient[-1].to_numpy() - num_grad_total.to_numpy() ) <= tolerance   )
+
+    return _, num_grad_total
 
 
 
