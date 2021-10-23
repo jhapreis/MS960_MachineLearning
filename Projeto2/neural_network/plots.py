@@ -82,7 +82,7 @@ def multiple_gen_image(   images, classifications, nrows=4, ncols=4, figsize=(12
 
                 ax.imshow(two_d, interpolation='nearest', cmap='gray')
                 
-                plt.rcParams['text.color'] = 'white'
+                plt.rcParams['text.color'] = 'black'
                 ax.set_title(title)
                 ax.axis('off')
 
@@ -134,7 +134,7 @@ def plot_thetas(   first_thetas, nrows=4, ncols=4, figsize=(12,12)   ):
 
                 ax.imshow(two_d, interpolation='nearest', cmap='gray')
                 
-                plt.rcParams['text.color'] = 'white'
+                plt.rcParams['text.color'] = 'black'
                 ax.set_title(title)
                 ax.axis('off')
 
