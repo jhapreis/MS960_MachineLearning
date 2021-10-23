@@ -16,19 +16,19 @@ ADDITIONAL_LAYERS = 25 #
 INIT_THETAS_RANGE = 1E-4 # range to initiate the thetas constants
 
 MAX_COST          = 5E-2      
-MAX_TRIES         = 1E2 
+MAX_TRIES         = 1E3 
 LEARNING_RATE     = 1E-1 
 COST_MEASUREMENT  = 'any'
 
-SEND_EMAIL        = False
+SEND_EMAIL        = True
 TRACKING          = False
 
 """SAVE_THETAS"""
-SAVE_THETAS       = True
-CURVA_APRENDIZADO = False
-OPTIMIZE_LAMBDA   = False
-LAMBDA_VALUE      = [0] 
-VALUE_FRAC_TREINO = [1.] 
+# SAVE_THETAS       = True
+# CURVA_APRENDIZADO = False
+# OPTIMIZE_LAMBDA   = False
+# LAMBDA_VALUE      = [0] 
+# VALUE_FRAC_TREINO = [1.] 
 
 """CURVA_APRENDIZADO"""
 # SAVE_THETAS       = False
@@ -39,11 +39,11 @@ VALUE_FRAC_TREINO = [1.]
 # LAMBDA_VALUE      = [1.] # lambda for the regularization
 
 """OPTMIZE_LAMBDA"""
-# SAVE_THETAS       = False
-# CURVA_APRENDIZADO = False
-# OPTIMIZE_LAMBDA   = True
-# VALUE_FRAC_TREINO = [1.]
-# LAMBDA_VALUE      = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.2, 1.5, 1.7, 1.9, 2.5, 3., 10.]
+SAVE_THETAS       = False
+CURVA_APRENDIZADO = False
+OPTIMIZE_LAMBDA   = True
+VALUE_FRAC_TREINO = [1.]
+LAMBDA_VALUE      = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.2, 1.5, 1.7, 1.9, 2.5, 3., 10.]
 
 
 

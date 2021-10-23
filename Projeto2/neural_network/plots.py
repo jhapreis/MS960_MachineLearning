@@ -48,7 +48,7 @@ def multiple_gen_image(   images, classifications, nrows=4, ncols=4, figsize=(12
     figs = []
 
     images_per_pg = nrows*ncols
-    quantidade_pg = (images.shape[1] // images_per_pg) + 1
+    quantidade_pg = ((images.shape[1]  - 1)// images_per_pg) + 1
 
     image_number = 0
     
@@ -70,6 +70,58 @@ def multiple_gen_image(   images, classifications, nrows=4, ncols=4, figsize=(12
 
                     title = image.name
                     title = f"{title}; orig={classification['original']}, given={classification['atribuido']}" 
+
+
+                else: # else, plot a black figure with no title
+
+                    data = np.zeros((20,20))
+                    title = ''
+            
+                two_d = (np.reshape(data, (20, 20)) * (2**8 - 1)).T
+
+
+                ax.imshow(two_d, interpolation='nearest', cmap='gray')
+                
+                plt.rcParams['text.color'] = 'white'
+                ax.set_title(title)
+                ax.axis('off')
+
+                image_number += 1
+
+        figs.append(fig)
+    
+    return figs
+
+
+
+# =============================================================================
+def plot_thetas(   first_thetas, nrows=4, ncols=4, figsize=(12,12)   ):
+
+    figs = []
+
+    images_per_pg = nrows*ncols
+    quantidade_pg = ((first_thetas.shape[1] - 1) // images_per_pg) + 1
+
+    image_number = 0
+    
+    for n in range(quantidade_pg):
+
+        fig, axarr = plt.subplots(nrows, ncols, figsize=figsize) # generate page of images
+
+        for i in range(nrows): # fill that page with the figures
+
+            for j in range(ncols):
+
+                ax = axarr[i,j]
+
+                if first_thetas.shape[1] > image_number: # if there is another image to plot
+
+                    image = first_thetas[ first_thetas.columns[image_number] ]
+                    # classification = classifications.iloc[image_number]
+                    data  = np.array( image ) 
+
+                    title = image.name
+                    # title = f"{title}; orig={classification['original']}, given={classification['atribuido']}" 
 
 
                 else: # else, plot a black figure with no title

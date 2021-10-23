@@ -46,6 +46,7 @@ def BackPropagation_NeuralNetwork(
     grad        = gradient_layer(class_matrix, activations, thetas, lambda_value=lambda_value)
     compare     = compare_cost_categories(cost, max_cost, cost_metric)    
 
+    # print(cost)
 
     '''
     Check gradient
@@ -80,7 +81,7 @@ def BackPropagation_NeuralNetwork(
         cost        = cost_function_sigmoid(activations, class_matrix, thetas, lambda_value=lambda_value)
         grad        = gradient_layer(class_matrix, activations, thetas, lambda_value=lambda_value)
         compare     = compare_cost_categories(cost, max_cost, cost_metric)
-        
+
         thetas      = update_thetas(thetas, grad, learning_rate)
 
         if bar:
