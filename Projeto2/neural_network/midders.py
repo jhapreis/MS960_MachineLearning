@@ -119,22 +119,23 @@ def cost_function_sigmoid(activations, classification_matrix, thetas, lambda_val
     dimensional_error(activations[-1].shape, classification_matrix.shape)
 
     number_of_elements = classification_matrix.shape[1]
-    last_activation = activations[-1]
 
-    cost_not_regular = np.multiply( classification_matrix, np.log(last_activation) ) + np.multiply( (1 - classification_matrix) , np.log(1 - last_activation) )
-    cost_not_regular = cost_not_regular.sum(axis=1)
+    cost_not_regular = classification_matrix*np.log(activations[-1]) + (1 - classification_matrix)*np.log(1 - activations[-1])
+    cost_not_regular = cost_not_regular.sum(axis=1)     # sum for all costs that derive from a data
 
     if lambda_value == 0:
-        cost = cost_not_regular
+        cost_regular = np.zeros(cost_not_regular.shape) # cost_regular = 0 
     else:
-        cost_regular = (thetas[-1]**2).sum(axis=0).T # sum all thetas that arrive on the same cell
-        cost_regular.index = cost_not_regular.index # label with same name, in order to sum element-wise
+        cost_regular = ((thetas[-1])**2).sum(axis=0).T  # sum all thetas that arrive on the same cell
+        cost_regular.index = cost_not_regular.index     # label with same name, in order to sum element-wise
         dimensional_error(cost_not_regular.shape, cost_regular.shape)
 
-        #cost = -1/m*cost_regular + lambda/2m*cost_not_regular
 
-        cost =  -1/number_of_elements*cost_not_regular + lambda_value/(2*number_of_elements)*cost_regular 
-        dimensional_error(cost_regular.shape, cost.shape)
+    """
+    cost = -1/m*cost_regular + lambda/2m*cost_not_regular
+    """
+    cost = -1/number_of_elements*cost_not_regular + lambda_value/(2*number_of_elements)*cost_regular 
+    dimensional_error(cost_regular.shape, cost.shape)
 
     cost = pd.DataFrame( cost, columns=['cost'] ) 
 
@@ -200,9 +201,6 @@ def test_gradient(gradient, thetas, activations_neural, classification_matrix, l
 
         cost_plus             = cost_function_sigmoid([last_activation_plus] , classification_matrix, [last_thetas_plus] , lambda_value)
         cost_minus            = cost_function_sigmoid([last_activation_minus], classification_matrix, [last_thetas_minus], lambda_value)
-
-        print(cost_plus)
-        print(cost_minus)
 
         num_grad   = (cost_plus - cost_minus)/(2*step) # it's a column DataFrame
         num_grad_total = pd.concat([num_grad_total, num_grad], axis=1)
