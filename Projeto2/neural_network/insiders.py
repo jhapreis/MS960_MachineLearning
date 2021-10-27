@@ -191,7 +191,7 @@ def Delta_layer(y_data, activations, thetas):
 
             dimensional_error(matrix_activ.shape, a_times_delta.shape)
 
-            a_times_delta = a_times_delta + np.multiply(matrix_activ,matrix_delta)
+            a_times_delta += matrix_activ*matrix_delta
 
         a_times_delta = pd.DataFrame(a_times_delta, index=thetas[i].index, columns=thetas[i].columns)
 

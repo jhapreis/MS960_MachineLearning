@@ -61,7 +61,7 @@ def activation_layer(x_data, classification_matrix, thetas):
     '''
     '''
 
-    activations = [x_data]           # calculate for the first layer
+    activations = [x_data]         # calculate for the first layer
 
     for i in range( len(thetas) ): # calculate for the others layers
         activation = activation_values(activations[-1], thetas[i])
